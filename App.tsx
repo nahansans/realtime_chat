@@ -20,7 +20,7 @@ const App = () => {
         <Stack.Navigator
           screenOptions = {{
             headerShown: false,
-            ...TransitionPresets.FadeFromBottomAndroid
+            // ...TransitionPresets.FadeFromBottomAndroid
           }}
         >
           <Stack.Screen
@@ -39,7 +39,7 @@ const App = () => {
             name = 'Home'
             component = {Home}
             options = {{
-              ...TransitionPresets.ModalSlideFromBottomIOS
+              // ...TransitionPresets.ModalSlideFromBottomIOS
             }}
           />
           <Stack.Screen

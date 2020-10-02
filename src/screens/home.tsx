@@ -7,6 +7,7 @@ import { RouteProp } from '@react-navigation/native';
 
 import { StackParamsList } from '../references/types/navigator'
 import LinearGradient from 'react-native-linear-gradient';
+import database from '@react-native-firebase/database';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Home'>
@@ -16,6 +17,14 @@ type PropsList = {
 const Home = (props: PropsList) => {
     const { navigation, route } = props
     const { OpenSans } = Fonts
+    useEffect(() => {
+        database()
+        .ref('/users/')
+        .once('value')
+        .then(snapshot => {
+            console.log(snapshot.val())
+        })
+    }, [])
     const chats = [
         {
             user: 'Naufal Hanif Ihsanudin',

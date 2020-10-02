@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef} from 'react'
-import { View, Text, Image, TextInput, TouchableOpacity, Pressable, Animated, Easing, ActivityIndicator } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, Pressable, Animated, Easing, ActivityIndicator, Alert } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { StackParamsList } from '../references/types/navigator'
 import { Fonts } from './../references/fonts';
 import { RouteProp } from '@react-navigation/native'
+import database from '@react-native-firebase/database';
+import AsyncStorage from '@react-native-community/async-storage'
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Login'>
@@ -24,10 +26,31 @@ const Login = (props: PropsList) => {
     const login = () => {
         setisLoading(true)
         if (username !== '' && password !== '') {
-            setTimeout(() => {
-                navigation.replace('Home')
-                setisLoading(false)
-            }, 1000);
+            // setTimeout(() => {
+            //     navigation.replace('Home')
+            //     setisLoading(false)
+            // }, 1000);
+            database()
+            .ref('users')
+            .once('value')
+            .then(snapshot => {
+                // console.log(snapshot.val())
+                for (let index = 0; index < snapshot.val().length; index++) {
+                    const element = snapshot.val()[index];
+                    if (username === element.username && password === element.password) {
+                        console.log(element)
+                        console.log('Berhasil Masuk')
+                        navigation.replace('Home')
+                        // AsyncStorage.setItem('SessionUser', element)
+                        console.log(Date.now())
+                        setisLoading(false)
+
+                        break
+                    } else {                        
+                        setisLoading(false)
+                    }
+                }
+            })
         }
     }
 
@@ -95,6 +118,7 @@ const Login = (props: PropsList) => {
                     Username
                 </Text>
                 <TextInput
+                    autoCapitalize = 'none'
                     returnKeyType = 'next'
                     onSubmitEditing = {() => passwordRef.current?.focus()}
                     style = {{
@@ -125,6 +149,7 @@ const Login = (props: PropsList) => {
                     Password
                 </Text>
                 <TextInput
+                    autoCapitalize = 'none'
                     returnKeyType = 'go'
                     secureTextEntry = {true}
                     onSubmitEditing = {login}

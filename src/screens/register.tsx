@@ -5,6 +5,9 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { StackParamsList } from '../references/types/navigator'
 import { Fonts } from './../references/fonts';
 import { RouteProp } from '@react-navigation/native'
+import database from '@react-native-firebase/database'
+import Snackbar from 'react-native-snackbar'
+import AsyncStorage from '@react-native-community/async-storage'
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Register'>
@@ -18,17 +21,70 @@ const Register = (props: PropsList) => {
     const [password, setPassword] = useState('')
     const [scale, setScale] = useState(new Animated.Value(0))
     const [isLoading, setisLoading] = useState(false)
+    const [usersData, setusersData] = useState([])    
     
     const passwordRef = useRef<TextInput>(null)
 
     const register = () => {
-        setisLoading(true)
+        setisLoading(true)        
         if (username !== '' && password !== '') {
-            setTimeout(() => {
-                navigation.replace('Login')
-                setisLoading(false)
-            }, 1000);
+            database()
+            .ref('users')
+            .once('value')
+            .then(snapshot => {
+                // console.log(snapshot.val())
+                if (snapshot.val() !== null) {                    
+                    for (let index = 0; index < snapshot.val().length; index++) {
+                        const element = snapshot.val()[index];
+                        console.log(element.username)
+                        if (username === element.username) {                            
+                            Snackbar.show({
+                                text: 'Username Sudah Digunakan',
+                                duration: Snackbar.LENGTH_SHORT,
+                            });
+                            setisLoading(false)
+                            break
+                        } else {
+                            checkSuccess(snapshot.val())
+                            break
+                        }
+                    }
+                } else {
+                    checkSuccess()
+                }
+            })
         }
+    }
+
+    const checkSuccess = (snapshot?: any) => {        
+        // console.log(snapshot)
+        const data = {
+            username,
+            password
+        }
+        // let newData = undefined
+        
+        if (snapshot != undefined) {
+            console.log(snapshot.length )
+        }        
+        const newReference = database()
+            .ref(snapshot == undefined ? `/users/0` : `/users/${snapshot.length}`)
+            .set(
+                snapshot == undefined ?
+                {
+                    username, password
+                }
+                :
+                {
+                    username, password
+                }
+            )
+            .then(() => {
+                console.log('Berhasil Mendaftar')
+                navigation.replace('Login')
+                console.log(Date.now())
+                setisLoading(false)
+            });
     }
 
     return (
@@ -95,6 +151,7 @@ const Register = (props: PropsList) => {
                     Username
                 </Text>
                 <TextInput
+                    autoCapitalize = 'none'
                     returnKeyType = 'next'
                     onSubmitEditing = {() => passwordRef.current?.focus()}
                     style = {{
@@ -125,6 +182,7 @@ const Register = (props: PropsList) => {
                     Password
                 </Text>
                 <TextInput
+                    autoCapitalize = 'none'
                     returnKeyType = 'go'
                     secureTextEntry = {true}
                     onSubmitEditing = {register}
