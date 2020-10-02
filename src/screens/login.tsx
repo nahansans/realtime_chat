@@ -34,20 +34,20 @@ const Login = (props: PropsList) => {
             .ref('users')
             .once('value')
             .then(snapshot => {
+                setisLoading(false)
+
                 // console.log(snapshot.val())
-                for (let index = 0; index < snapshot.val().length; index++) {
-                    const element = snapshot.val()[index];
-                    if (username === element.username && password === element.password) {
-                        console.log(element)
-                        console.log('Berhasil Masuk')
+                const usersData = snapshot.val()
+                
+                for (let index = 0; index < usersData.length; index++) {
+                    const currentIndexUserData = usersData[index];
+
+                    if (username === currentIndexUserData.username && password === currentIndexUserData.password) {
                         navigation.replace('Home')
-                        // AsyncStorage.setItem('SessionUser', element)
-                        console.log(Date.now())
-                        setisLoading(false)
+
+                        AsyncStorage.setItem('SessionUser', JSON.stringify(currentIndexUserData))
 
                         break
-                    } else {                        
-                        setisLoading(false)
                     }
                 }
             })

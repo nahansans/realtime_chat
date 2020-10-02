@@ -4,6 +4,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { StackParamsList } from '../references/types/navigator'
 import { Fonts } from './../references/fonts';
+import AsyncStorage from '@react-native-community/async-storage'
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'SplashScreen'>
@@ -12,11 +13,19 @@ type PropsList = {
 const SplashScreen = (props: PropsList) => {
     const { OpenSans } = Fonts
     const { navigation } = props
+
     useEffect(() => {
-        setTimeout(() => {
-            navigation.replace('Login')
+        setTimeout(async() => {
+            const sessionUser = await AsyncStorage.getItem('SessionUser')
+
+            if(sessionUser == null) {
+                navigation.replace('Login')
+            } else {
+                navigation.replace('Home')
+            }
         }, 1000);
     }, [])
+
     return (
         <View style = {{ flex: 1, alignItems: 'center', justifyContent: 'center'}} >
             <LinearGradient

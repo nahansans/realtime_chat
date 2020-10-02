@@ -9,6 +9,12 @@ import { StackParamsList } from '../references/types/navigator'
 import LinearGradient from 'react-native-linear-gradient';
 import { TextInput } from 'react-native-gesture-handler';
 
+import database from '@react-native-firebase/database';
+
+import { SessionUserType } from '../references/types/session-user'
+import { RoomType } from '../references/types/room'
+import AsyncStorage from '@react-native-community/async-storage';
+
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Chat'>
     route: RouteProp<StackParamsList, 'Chat'>
@@ -17,6 +23,10 @@ type PropsList = {
 const Chat = (props: PropsList) => {
     const { navigation, route } = props
     const {OpenSans} = Fonts
+
+    const [sessionUser, setSessionUser] = useState({} as SessionUserType)
+    const [room, setRoom] = useState({} as RoomType)
+
     const chats = [
         {
             date: '1 Oktober 2020',
@@ -63,6 +73,21 @@ const Chat = (props: PropsList) => {
             ]
         },
     ]
+
+    useEffect(() => {
+        getSessionUserAndRooms()
+    }, [])
+
+    async function getSessionUserAndRooms() {
+        const sessionUser = await AsyncStorage.getItem('SessionUser')
+
+        setSessionUser(JSON.parse(sessionUser!) as SessionUserType)
+
+        database()
+        .ref(`/rooms/${route.params.roomIndex}`)
+        .on('value', (snapshot: any) => setRoom(snapshot.val() as RoomType))
+    }
+
     return(
         <SafeAreaView
             style = {{
@@ -113,19 +138,25 @@ const Chat = (props: PropsList) => {
                         paddingLeft: 10
                     }}
                 >
-                    Naufal Hanif
+                    {route.params.withUser}
                 </Text>
             </View>
             <ScrollView
+                contentContainerStyle = {{
+                    justifyContent: 'flex-end',
+                    flexGrow: 1
+                }}
                 style = {{
                     flex: 1
                 }}
             >
                 {
-                    chats.map((item, index) => {
+                    (room.messages || []).map((message, messageIndex) => {
+                        const interlocutors = room.participants[0] == sessionUser!.username ? room.participants[1] : room.participants[0]
+
                         return (
                             <>
-                            <View
+                            {/* <View
                                 style = {{
                                     flex: 1,
                                     justifyContent: 'flex-end',
@@ -146,64 +177,57 @@ const Chat = (props: PropsList) => {
                                 >
                                     {item.date}
                                 </Text>
-                            </View>
+                            </View> */}
+                            
                             {
-                                item.chat_terkirim.map((chatTerkirim, index) => {
-                                    return (
-                                        <View
+                                message.sender == sessionUser.username ?
+                                    <View
+                                        style = {{
+                                            backgroundColor: '#0abde3',
+                                            alignItems: 'flex-end',
+                                            alignSelf: 'flex-end',
+                                            flexWrap: 'wrap',
+                                            paddingVertical: 10,
+                                            paddingHorizontal: 10,
+                                            borderRadius: 10,
+                                            marginLeft: 50,
+                                            marginRight: 10,
+                                            marginBottom: 10
+                                        }}
+                                    >
+                                        <Text
                                             style = {{
-                                                backgroundColor: '#0abde3',
-                                                alignItems: 'flex-end',
-                                                alignSelf: 'flex-end',
-                                                flexWrap: 'wrap',
-                                                paddingVertical: 10,
-                                                paddingHorizontal: 10,
-                                                borderRadius: 10,
-                                                marginLeft: 50,
-                                                marginRight: 10,
-                                                marginBottom: 10
+                                                fontFamily: OpenSans.Regular,
+                                                color: '#FFF',
                                             }}
                                         >
-                                            <Text
-                                                style = {{
-                                                    fontFamily: OpenSans.Regular,
-                                                    color: '#FFF',
-                                                }}
-                                            >
-                                                {chatTerkirim}
-                                            </Text>
-                                        </View>
-                                    )
-                                })
-                            }
-                            {
-                                item.chat_diterima.map((chatDiterima, index) => {
-                                    return (
-                                        <View
+                                            {message.text}
+                                        </Text>
+                                    </View>
+                                    :
+                                    <View
+                                        style = {{
+                                            backgroundColor: '#c8d6e5',
+                                            alignItems: 'flex-start',
+                                            alignSelf: 'flex-start',
+                                            flexWrap: 'wrap',
+                                            paddingVertical: 10,
+                                            paddingHorizontal: 10,
+                                            borderRadius: 10,
+                                            marginLeft: 10,
+                                            marginRight: 50,
+                                            marginBottom: 10
+                                        }}
+                                    >
+                                        <Text
                                             style = {{
-                                                backgroundColor: '#c8d6e5',
-                                                alignItems: 'flex-end',
-                                                alignSelf: 'flex-end',
-                                                flexWrap: 'wrap',
-                                                paddingVertical: 10,
-                                                paddingHorizontal: 10,
-                                                borderRadius: 10,
-                                                marginLeft: 10,
-                                                marginRight: 50,
-                                                marginBottom: 10
+                                                fontFamily: OpenSans.Regular,
+                                                color: 'black',
                                             }}
                                         >
-                                            <Text
-                                                style = {{
-                                                    fontFamily: OpenSans.Regular,
-                                                    color: 'black',
-                                                }}
-                                            >
-                                                {chatDiterima}
-                                            </Text>
-                                        </View>
-                                    )
-                                })
+                                            {message.text}
+                                        </Text>
+                                    </View>
                             }
                             </>
                         )

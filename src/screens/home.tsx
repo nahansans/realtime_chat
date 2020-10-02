@@ -8,6 +8,10 @@ import { RouteProp } from '@react-navigation/native';
 import { StackParamsList } from '../references/types/navigator'
 import LinearGradient from 'react-native-linear-gradient';
 import database from '@react-native-firebase/database';
+import AsyncStorage from '@react-native-community/async-storage';
+
+import { SessionUserType } from '../references/types/session-user'
+import { RoomType } from '../references/types/room'
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Home'>
@@ -17,32 +21,24 @@ type PropsList = {
 const Home = (props: PropsList) => {
     const { navigation, route } = props
     const { OpenSans } = Fonts
+
+    const [sessionUser, setSessionUser] = useState({} as SessionUserType)
+    const [rooms, setRooms] = useState([] as RoomType[])
+
     useEffect(() => {
-        database()
-        .ref('/users/')
-        .once('value')
-        .then(snapshot => {
-            console.log(snapshot.val())
-        })
+        getSessionUserAndRooms()
     }, [])
-    const chats = [
-        {
-            user: 'Naufal Hanif Ihsanudin',
-            chat: 'This is the distance between the top of the user scre'
-        },
-        {
-            user: 'Naufal',
-            chat: 'This is the distance between the top of the user screen and the react native view, may be non-zero in some use cases. Defaults to 0.'
-        },
-        {
-            user: 'Hanif',
-            chat: 'This is the distance between the top of the user screen and the react native view, may be non-zero in some use cases. Defaults to 0.'
-        },
-        {
-            user: 'Ihsanudin',
-            chat: 'This is the distance between the top of the user screen and the react native view, may be non-zero in some use cases. Defaults to 0.'
-        },
-    ]
+
+    async function getSessionUserAndRooms() {
+        const sessionUser = await AsyncStorage.getItem('SessionUser')
+
+        setSessionUser(JSON.parse(sessionUser!) as SessionUserType)
+
+        database()
+        .ref('/rooms/')
+        .on('value', (snapshot: any) => setRooms((snapshot.val() || []) as RoomType[]))
+    }
+
     return(
         <SafeAreaView
             style = {{
@@ -97,12 +93,14 @@ const Home = (props: PropsList) => {
             </View>
             <ScrollView>
                 {
-                    chats.map((item, index) => {
+                    rooms.map((room, roomIndex) => {
+                        const interlocutors = room.participants[0] == sessionUser!.username ? room.participants[1] : room.participants[0]
+
                         return (
                             <TouchableOpacity
-                                key = {index}
+                                key = {roomIndex}
                                 activeOpacity = {0.6}
-                                onPress = {() => navigation.navigate('Chat', {fromScreen:'Home'})}
+                                onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
                                 style = {{
                                     flexDirection: 'row',
                                     margin: 10,
@@ -117,6 +115,7 @@ const Home = (props: PropsList) => {
                                         height: 30
                                     }}
                                 /> */}
+                                
                                 <View
                                     style = {{
                                         paddingLeft: 10,
@@ -130,8 +129,9 @@ const Home = (props: PropsList) => {
                                             fontSize: 14
                                         }}
                                     >
-                                        {item.user.length <= 53 ? item.user : `${item.user.substring(0, 53)}...`}
+                                        {interlocutors}
                                     </Text>
+
                                     <Text
                                         numberOfLines = {1}
                                         style = {{
@@ -140,7 +140,7 @@ const Home = (props: PropsList) => {
                                             fontSize: 12, 
                                         }}
                                     >
-                                        {item.chat}
+                                        {room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
