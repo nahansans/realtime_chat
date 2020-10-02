@@ -40,7 +40,7 @@ const Register = (props: PropsList) => {
             .ref('users')
             .once('value')
             .then(snapshot => {
-                setusersData(snapshot.val())
+                setusersData(snapshot.val() as usersDataType[])
             })
     }
 
@@ -64,17 +64,24 @@ const Register = (props: PropsList) => {
     }
     function register() {        
         // console.log()
-        usersData.push({
+        let newUsersData = JSON.parse(JSON.stringify(usersData)) as usersDataType[]
+
+        newUsersData.push({
             username,password
-        })        
-        console.log(usersData)
-        console.log(typeof usersData)
+        })   
+
+        let usersDataToSend = {} as any
+
+        for(let userDataIndex = 0; userDataIndex < newUsersData.length; userDataIndex++) {
+            usersDataToSend[userDataIndex.toString()] = newUsersData[userDataIndex]
+        }
 
         database()
-        .ref(`/users`)
-        .update(usersData)
+        .ref(`/users/`)
+        .update(usersDataToSend)
         .then(() => {
             navigation.replace('Login')
+            
             setisLoading(false)
         })
     }
