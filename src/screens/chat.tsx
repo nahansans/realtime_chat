@@ -14,6 +14,7 @@ import database from '@react-native-firebase/database';
 import { SessionUserType } from '../references/types/session-user'
 import { RoomType } from '../references/types/room'
 import AsyncStorage from '@react-native-community/async-storage';
+import { string } from 'yargs';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Chat'>
@@ -26,6 +27,7 @@ const Chat = (props: PropsList) => {
 
     const [sessionUser, setSessionUser] = useState({} as SessionUserType)
     const [room, setRoom] = useState({} as RoomType)
+    const [inputText, setInputText] = useState('')
 
     const chats = [
         {
@@ -86,6 +88,21 @@ const Chat = (props: PropsList) => {
         database()
         .ref(`/rooms/${route.params.roomIndex}`)
         .on('value', (snapshot: any) => setRoom(snapshot.val() as RoomType))
+    }
+
+    function submit() {
+        const newRoomData = JSON.parse(JSON.stringify(room)) as RoomType
+        
+        newRoomData.messages?.push({
+            sender: sessionUser.username,
+            time: (new Date()).getTime(),
+            text: inputText
+        })
+
+        database()
+        .ref(`/rooms/${route.params.roomIndex}`)
+        .update(newRoomData)
+        .then(() => setInputText(''))
     }
 
     return(
@@ -249,6 +266,8 @@ const Chat = (props: PropsList) => {
                     }}
                 >
                     <TextInput
+                        onSubmitEditing = {() => submit()}
+                        onChangeText = {(newValue: string) => setInputText(newValue)}
                         style = {{
                             borderWidth: 1,
                             borderColor: '#c8d6e5',
@@ -257,10 +276,12 @@ const Chat = (props: PropsList) => {
                             paddingHorizontal: 20,
                             fontFamily: OpenSans.Regular
                         }}
+                        value = {inputText}
                     />
                 </View>
                 <TouchableOpacity
                     activeOpacity = {0.7}
+                    onPress = {() => submit()}
                     style = {{
                         padding: 10,
                         backgroundColor: '#0abde3',
