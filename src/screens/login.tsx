@@ -191,7 +191,7 @@ const Login = (props: PropsList) => {
                     <TouchableOpacity
                         activeOpacity = {0.8}
                         onPress = {() => {
-                            navigation.replace('Register')
+                            navigation.navigate('Register')
                         }}
                     >
                         <Text

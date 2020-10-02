@@ -12,7 +12,8 @@ const Stack = createStackNavigator()
 
 const App = () => {
   useEffect(() => {
-    StatusBar.setHidden(true)
+    StatusBar.setBackgroundColor('rgba(0,0,0,0)')
+    StatusBar.setBarStyle('dark-content')
   }, [])
   return (
     <>

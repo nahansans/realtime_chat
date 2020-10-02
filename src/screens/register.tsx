@@ -9,6 +9,12 @@ import database from '@react-native-firebase/database'
 import Snackbar from 'react-native-snackbar'
 import AsyncStorage from '@react-native-community/async-storage'
 
+type usersDataType = {
+    username: string,
+    password: any
+}
+
+
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Register'>
     route: RouteProp<StackParamsList, 'Register'>
@@ -21,70 +27,56 @@ const Register = (props: PropsList) => {
     const [password, setPassword] = useState('')
     const [scale, setScale] = useState(new Animated.Value(0))
     const [isLoading, setisLoading] = useState(false)
-    const [usersData, setusersData] = useState([])    
+    const [usersData, setusersData] = useState<usersDataType[]>([])  
     
     const passwordRef = useRef<TextInput>(null)
 
-    const register = () => {
-        setisLoading(true)        
-        if (username !== '' && password !== '') {
-            database()
+    useEffect(() => {
+        getUsersData()
+    }, [])
+
+    async function getUsersData() {        
+        database()
             .ref('users')
             .once('value')
             .then(snapshot => {
-                // console.log(snapshot.val())
-                if (snapshot.val() !== null) {                    
-                    for (let index = 0; index < snapshot.val().length; index++) {
-                        const element = snapshot.val()[index];
-                        console.log(element.username)
-                        if (username === element.username) {                            
-                            Snackbar.show({
-                                text: 'Username Sudah Digunakan',
-                                duration: Snackbar.LENGTH_SHORT,
-                            });
-                            setisLoading(false)
-                            break
-                        } else {
-                            checkSuccess(snapshot.val())
-                            break
-                        }
-                    }
-                } else {
-                    checkSuccess()
-                }
+                setusersData(snapshot.val())
             })
-        }
     }
 
-    const checkSuccess = (snapshot?: any) => {        
-        // console.log(snapshot)
-        const data = {
-            username,
-            password
-        }
-        // let newData = undefined
-        
-        if (snapshot != undefined) {
-            console.log(snapshot.length )
-        }        
-        const newReference = database()
-            .ref(snapshot == undefined ? `/users/0` : `/users/${snapshot.length}`)
-            .set(
-                snapshot == undefined ?
-                {
-                    username, password
-                }
-                :
-                {
-                    username, password
-                }
-            )
-            .then(() => {
-                console.log('Berhasil Mendaftar')
-                navigation.replace('Login')
-                console.log(Date.now())
+    function submit() {
+        setisLoading(true)
+        for (let index = 0; index < usersData.length; index++) {
+            const element = usersData[index];
+            
+            if (username === element.username) {
+                Snackbar.show({
+                    text: 'Username Sudah Digunakan',
+                    duration: Snackbar.LENGTH_SHORT,
+                });
                 setisLoading(false)
-            });
+
+                break
+            } else {
+                register()
+            }
+        }
+    }
+    function register() {        
+        // console.log()
+        usersData.push({
+            username,password
+        })        
+        console.log(usersData)
+        console.log(typeof usersData)
+
+        database()
+        .ref(`/users`)
+        .update(usersData)
+        .then(() => {
+            navigation.replace('Login')
+            setisLoading(false)
+        })
     }
 
     return (
@@ -185,7 +177,7 @@ const Register = (props: PropsList) => {
                     autoCapitalize = 'none'
                     returnKeyType = 'go'
                     secureTextEntry = {true}
-                    onSubmitEditing = {register}
+                    onSubmitEditing = {submit}
                     ref = {passwordRef}
                     style = {{
                         borderRadius:50,
@@ -258,7 +250,7 @@ const Register = (props: PropsList) => {
                             easing: Easing.ease
                         }).start()
                     }}
-                    onPress = {register}
+                    onPress = {submit}
                     style = {{
                         alignSelf: 'flex-end',
                         marginTop: 20,
