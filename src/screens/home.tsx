@@ -18,6 +18,10 @@ type PropsList = {
     route: RouteProp<StackParamsList, 'Home'>
 }
 
+type usersType = {
+    username: string
+}
+
 const Home = (props: PropsList) => {
     const { navigation, route } = props
     const { OpenSans } = Fonts
@@ -30,9 +34,12 @@ const Home = (props: PropsList) => {
     const [modalVisible, setModalVisible] = useState(false)
     const [modalCreateRoom, setModalCreateRoom] = useState(false)
     const [modalSearching, setModalSearching] = useState(false)
+    const [users, setUsers] = useState([] as usersType[])
+    const [typing, setTyping] = useState('')
 
     useEffect(() => {
         getSessionUserAndRooms()
+        search()
     }, [])
 
     async function getSessionUserAndRooms() {
@@ -43,6 +50,12 @@ const Home = (props: PropsList) => {
         database()
         .ref('/rooms/')
         .on('value', (snapshot: any) => setRooms((snapshot.val() || []) as RoomType[]))
+    }
+
+    const search = async() => {
+        database()
+        .ref('/users')
+        .on('value', (snapshot:any) => setUsers((snapshot.val() || []) as usersType[]))
     }
 
     return(
@@ -459,7 +472,44 @@ const Home = (props: PropsList) => {
                             Searching User
                         </Text>
                         <View style = {{flex: 1}} >
-                            <ScrollView></ScrollView>
+                            <ScrollView>
+                                {
+                                    users.map((item, index) => {
+                                        return (
+                                            <TouchableOpacity
+                                                key = {index}
+                                                activeOpacity = {0.6}
+                                                // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
+                                                style = {{
+                                                    flexDirection: 'row',
+                                                    padding: 10,
+                                                    alignItems: 'center',
+                                                    borderBottomColor: '#c8d6e5',
+                                                    borderBottomWidth: 1
+                                                }}
+                                            >
+                                                
+                                                <View
+                                                    style = {{
+                                                        paddingLeft: 10,
+                                                    }}
+                                                >
+                                                    <Text
+                                                        numberOfLines = {1}
+                                                        style = {{
+                                                            fontFamily: OpenSans.SemiBold,
+                                                            color: '#222f3e',
+                                                            fontSize: 14
+                                                        }}
+                                                    >
+                                                        {item.username}
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        )
+                                    })
+                                }
+                            </ScrollView>
                         </View>
                         <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
                             <TextInput
@@ -475,8 +525,12 @@ const Home = (props: PropsList) => {
                                     flex: 1,
                                     marginRight: 10
                                 }}
+                                onChangeText = {(value) => {
+                                    setTyping(value)
+                                }}
                             />
                             <TouchableOpacity
+                                onPress = {() => console.log(users)}
                                 style = {{
                                     backgroundColor: '#48dbfb',
                                     padding: 12,
