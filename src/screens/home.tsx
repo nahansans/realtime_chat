@@ -53,13 +53,13 @@ const Home = (props: PropsList) => {
     }
     const textInputRef = useRef<TextInput>(null)
 
-    const search = (value: any) => {        
+    const search = (value: string) => {        
         database()
         .ref('/users')
         .on('value', (snapshot:any) => {
             let users = (snapshot.val() || []) as usersType[]
 
-            let filteredUsers = users.filter(user => user.username.includes(value))
+            let filteredUsers = users.filter(user => user.username.toLocaleLowerCase().includes(value.toLowerCase()))
             setUsers(filteredUsers)
         })
     }    
@@ -497,7 +497,7 @@ const Home = (props: PropsList) => {
                         <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
                             <TextInput
                                 ref = {textInputRef}
-                                autoCapitalize = 'none'
+                                autoCapitalize = 'sentences'
                                 // returnKeyType = {'search'}
                                 placeholder = 'searching user...'
                                 style = {{
