@@ -39,7 +39,7 @@ const Home = (props: PropsList) => {
 
     useEffect(() => {
         getSessionUserAndRooms()
-        search()
+        // search()
     }, [])
 
     async function getSessionUserAndRooms() {
@@ -51,11 +51,32 @@ const Home = (props: PropsList) => {
         .ref('/rooms/')
         .on('value', (snapshot: any) => setRooms((snapshot.val() || []) as RoomType[]))
     }
+    const textInputRef = useRef<TextInput>(null)
 
     const search = async() => {
+        textInputRef.current?.blur()
         database()
         .ref('/users')
-        .on('value', (snapshot:any) => setUsers((snapshot.val() || []) as usersType[]))
+        .on('value', (snapshot:any) => {
+            let users = (snapshot.val() || []) as usersType[]
+
+            let filteredUsers = users.filter(user => user.username.includes(typing))
+            setUsers(filteredUsers)
+        })
+    }    
+
+    const chooseChat = (interlocutors: any) => {
+        for (let index = 0; index < rooms.length; index++) {
+            const element = rooms[index];
+            console.log(element.participants[0])
+            if (element.participants[0] === sessionUser.username && element.participants[1] == interlocutors || element.participants[0] == interlocutors && element.participants[1] === sessionUser.username) {
+                const intrlctrs = element.participants[0] == sessionUser!.username ? element.participants[1] : element.participants[0]
+                setModalSearching(false)
+                setUsers([])
+                navigation.navigate('Chat', {fromScreen:'Home', roomIndex: index, withUser: intrlctrs})
+            }
+        }
+        
     }
 
     return(
@@ -443,7 +464,10 @@ const Home = (props: PropsList) => {
                     }}
                 >
                     <TouchableOpacity
-                        onPress = {() => setModalSearching(false)}
+                        onPress = {() => {
+                            setModalSearching(false)
+                            setUsers([])
+                        }}
                         style = {{
                             width: '100%',
                             height: '100%',
@@ -480,6 +504,9 @@ const Home = (props: PropsList) => {
                                                 key = {index}
                                                 activeOpacity = {0.6}
                                                 // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
+                                                onPress = {() => {
+                                                    chooseChat(item.username)
+                                                }}
                                                 style = {{
                                                     flexDirection: 'row',
                                                     padding: 10,
@@ -513,6 +540,7 @@ const Home = (props: PropsList) => {
                         </View>
                         <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
                             <TextInput
+                                ref = {textInputRef}
                                 returnKeyType = {'search'}
                                 placeholder = 'searching user...'
                                 style = {{
@@ -528,9 +556,10 @@ const Home = (props: PropsList) => {
                                 onChangeText = {(value) => {
                                     setTyping(value)
                                 }}
+                                onSubmitEditing = {search}
                             />
                             <TouchableOpacity
-                                onPress = {() => console.log(users)}
+                                onPress = {search}
                                 style = {{
                                     backgroundColor: '#48dbfb',
                                     padding: 12,
