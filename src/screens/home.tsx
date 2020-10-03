@@ -35,7 +35,7 @@ const Home = (props: PropsList) => {
     const [modalCreateRoom, setModalCreateRoom] = useState(false)
     const [modalSearching, setModalSearching] = useState(false)
     const [users, setUsers] = useState([] as usersType[])
-    const [typing, setTyping] = useState('')
+
 
     useEffect(() => {
         getSessionUserAndRooms()
@@ -53,14 +53,13 @@ const Home = (props: PropsList) => {
     }
     const textInputRef = useRef<TextInput>(null)
 
-    const search = async() => {
-        textInputRef.current?.blur()
+    const search = (value: any) => {        
         database()
         .ref('/users')
         .on('value', (snapshot:any) => {
             let users = (snapshot.val() || []) as usersType[]
 
-            let filteredUsers = users.filter(user => user.username.includes(typing))
+            let filteredUsers = users.filter(user => user.username.includes(value))
             setUsers(filteredUsers)
         })
     }    
@@ -478,7 +477,7 @@ const Home = (props: PropsList) => {
                         style = {{
                             position: 'absolute',
                             width,
-                            height: height * 0.75,
+                            height: height * 0.5,
                             bottom: 0,
                             backgroundColor: 'white',
                             borderTopEndRadius: 20,
@@ -495,6 +494,27 @@ const Home = (props: PropsList) => {
                         >
                             Searching User
                         </Text>
+                        <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
+                            <TextInput
+                                ref = {textInputRef}
+                                autoCapitalize = 'none'
+                                // returnKeyType = {'search'}
+                                placeholder = 'searching user...'
+                                style = {{
+                                    borderColor: '#222f3e',
+                                    borderWidth: 1,
+                                    paddingHorizontal: 10,
+                                    marginVertical: 5,
+                                    borderRadius: 10,
+                                    fontFamily: OpenSans.Regular,
+                                    flex: 1,
+                                    marginRight: 10
+                                }}
+                                onChangeText = {(value) => {
+                                    search(value)
+                                }}
+                            />
+                        </View>
                         <View style = {{flex: 1}} >
                             <ScrollView>
                                 {
@@ -537,46 +557,6 @@ const Home = (props: PropsList) => {
                                     })
                                 }
                             </ScrollView>
-                        </View>
-                        <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
-                            <TextInput
-                                ref = {textInputRef}
-                                returnKeyType = {'search'}
-                                placeholder = 'searching user...'
-                                style = {{
-                                    borderColor: '#222f3e',
-                                    borderWidth: 1,
-                                    paddingHorizontal: 10,
-                                    marginVertical: 5,
-                                    borderRadius: 10,
-                                    fontFamily: OpenSans.Regular,
-                                    flex: 1,
-                                    marginRight: 10
-                                }}
-                                onChangeText = {(value) => {
-                                    setTyping(value)
-                                }}
-                                onSubmitEditing = {search}
-                            />
-                            <TouchableOpacity
-                                onPress = {search}
-                                style = {{
-                                    backgroundColor: '#48dbfb',
-                                    padding: 12,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    borderRadius: 10
-                                }}
-                            >
-                                <Image
-                                    source = {require('../images/search.png')}
-                                    style = {{
-                                        width: 17,
-                                        height: 17,
-                                        tintColor: 'white'
-                                    }}
-                                />
-                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
