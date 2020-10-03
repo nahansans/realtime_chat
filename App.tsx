@@ -11,17 +11,14 @@ import Chat from './src/screens/chat';
 const Stack = createStackNavigator()
 
 const App = () => {
-  useEffect(() => {
-    StatusBar.setBackgroundColor('rgba(0,0,0,0)')
-    StatusBar.setBarStyle('dark-content')
-  }, [])
+  
   return (
-    <>
+    <>      
       <NavigationContainer>
         <Stack.Navigator
           screenOptions = {{
             headerShown: false,
-            // ...TransitionPresets.FadeFromBottomAndroid
+            ...TransitionPresets.SlideFromRightIOS
           }}
         >
           <Stack.Screen
@@ -39,9 +36,6 @@ const App = () => {
           <Stack.Screen
             name = 'Home'
             component = {Home}
-            options = {{
-              // ...TransitionPresets.ModalSlideFromBottomIOS
-            }}
           />
           <Stack.Screen
             name = 'Chat'

@@ -29,53 +29,6 @@ const Chat = (props: PropsList) => {
     const [room, setRoom] = useState({} as RoomType)
     const [inputText, setInputText] = useState('')
 
-    const chats = [
-        {
-            date: '1 Oktober 2020',
-            chat_terkirim: [
-                `The words hadn't flowed from his fingers for the past few weeks`,
-                `Josh had spent year and year accumulating the information. `
-            ],
-            chat_diterima: [
-                `He never imagined he'd find himself with writer's block, but here he sat with a blank screen in front of him.`,
-                `He knew it inside out and if there was ever anyone looking for an expert in the field, Josh would be the one to call.`
-            ]
-        },
-        {
-            date: '8 Oktober 2020',
-            chat_terkirim: [
-                `That blank screen taunting him day after day had started to play with his mind.`,
-                `The problem was that there was nobody interested in the information besides him and he knew it.`
-            ],
-            chat_diterima: [
-                `He didn't understand why he couldn't even type a single word, just one to begin the process and build from there.`,
-                `Years of information painstakingly memorized and sorted with not a sole giving even an ounce of interest in the topic.`
-            ]
-        },
-        {
-            date: '10 Oktober 2020',
-            chat_terkirim: [
-                `And yet, he already knew that the eight hours he was prepared to sit in front of his computer today would end with the screen remaining blank.`,
-                `Balloons are pretty and come in different colors, different shapes, different sizes, and they can even adjust sizes as needed. `
-            ],
-            chat_diterima: [
-                `I recently discovered I could make fudge with just chocolate chips, sweetened condensed milk, vanilla extract, and a thick pot on slow heat.`,
-                `But don't make them too big or they might just pop, and then bye-bye balloon.`
-            ]
-        },
-        {
-            date: '14 Oktober 2020',
-            chat_terkirim: [
-                `And yet, he already knew that the eight hours he was prepared to sit in front of his computer today would end with the screen remaining blank.`,
-                `It'll be gone and lost for the rest of mankind.`
-            ],
-            chat_diterima: [
-                `I recently discovered I could make fudge with just chocolate chips, sweetened condensed milk, vanilla extract, and a thick pot on slow heat.`,
-                `They can serve a variety of purposes, from decorating to water balloon wars.`
-            ]
-        },
-    ]
-
     useEffect(() => {
         getSessionUserAndRooms()
     }, [])
@@ -115,7 +68,6 @@ const Chat = (props: PropsList) => {
                 style = {{
                     backgroundColor: '#0abde3',
                     padding: 20,
-                    borderBottomEndRadius: 50,
                     overflow: 'hidden',  
                     flexDirection: 'row',                    
                     alignItems: 'center'
