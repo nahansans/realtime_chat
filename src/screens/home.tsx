@@ -64,20 +64,6 @@ const Home = (props: PropsList) => {
         })
     }    
 
-    const chooseChat = (interlocutors: any) => {
-        for (let index = 0; index < rooms.length; index++) {
-            const element = rooms[index];
-            console.log(element.participants[0])
-            if (element.participants[0] === sessionUser.username && element.participants[1] == interlocutors || element.participants[0] == interlocutors && element.participants[1] === sessionUser.username) {
-                const intrlctrs = element.participants[0] == sessionUser!.username ? element.participants[1] : element.participants[0]
-                setModalSearching(false)
-                setUsers([])
-                navigation.navigate('Chat', {fromScreen:'Home', roomIndex: index, withUser: intrlctrs})
-            }
-        }
-        
-    }
-
     return(
         <SafeAreaView
             style = {{
@@ -525,7 +511,19 @@ const Home = (props: PropsList) => {
                                                 activeOpacity = {0.6}
                                                 // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
                                                 onPress = {() => {
-                                                    chooseChat(item.username)
+                                                    let selectedRoomIndex = -1
+
+                                                    for(let roomIndex = 0; roomIndex < rooms.length; roomIndex++) {
+                                                        if(rooms[roomIndex].participants.includes(sessionUser.username) && rooms[roomIndex].participants.includes(item.username)) {
+                                                            selectedRoomIndex = roomIndex
+                                                        }
+                                                    }
+
+                                                    setModalVisible(false)
+
+                                                    if(selectedRoomIndex != -1) {
+                                                        navigation.navigate('Chat', {fromScreen:'Home', roomIndex: selectedRoomIndex, withUser: item.username})
+                                                    }
                                                 }}
                                                 style = {{
                                                     flexDirection: 'row',
