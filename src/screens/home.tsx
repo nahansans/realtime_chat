@@ -59,7 +59,8 @@ const Home = (props: PropsList) => {
         .on('value', (snapshot:any) => {
             let users = (snapshot.val() || []) as usersType[]
 
-            let filteredUsers = users.filter(user => user.username.toLocaleLowerCase().includes(value.toLowerCase()))
+            let filteredUsers = users.filter(user => user.username.toLocaleLowerCase().includes(value.toLowerCase()) && user.username != sessionUser.username)
+
             setUsers(filteredUsers)
         })
     }    
@@ -139,7 +140,9 @@ const Home = (props: PropsList) => {
                 </View>
 
             </View>
-            <ScrollView>
+            <ScrollView
+                keyboardShouldPersistTaps = 'handled'
+            >
                 {
                     rooms.map((room, roomIndex) => {
                         const interlocutors = room.participants[0] == sessionUser!.username ? room.participants[1] : room.participants[0]
@@ -483,7 +486,7 @@ const Home = (props: PropsList) => {
                         <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
                             <TextInput
                                 ref = {textInputRef}
-                                autoCapitalize = 'sentences'
+                                autoCapitalize = 'none'
                                 // returnKeyType = {'search'}
                                 placeholder = 'searching user...'
                                 style = {{
@@ -502,7 +505,9 @@ const Home = (props: PropsList) => {
                             />
                         </View>
                         <View style = {{flex: 1}} >
-                            <ScrollView>
+                            <ScrollView        
+                                keyboardShouldPersistTaps = 'handled'
+                            >
                                 {
                                     users.map((item, index) => {
                                         return (
@@ -518,11 +523,14 @@ const Home = (props: PropsList) => {
                                                             selectedRoomIndex = roomIndex
                                                         }
                                                     }
-
-                                                    setModalVisible(false)
+                                                    
+                                                    setUsers([])
+                                                    setModalSearching(false)
 
                                                     if(selectedRoomIndex != -1) {
                                                         navigation.navigate('Chat', {fromScreen:'Home', roomIndex: selectedRoomIndex, withUser: item.username})
+                                                    } else {
+                                                        navigation.navigate('Chat', {fromScreen:'Home', withUser: item.username})
                                                     }
                                                 }}
                                                 style = {{
