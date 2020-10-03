@@ -26,8 +26,10 @@ const Home = (props: PropsList) => {
     const [sessionUser, setSessionUser] = useState({} as SessionUserType)
     const [rooms, setRooms] = useState([] as RoomType[])
     const scale = useRef(new Animated.Value(1)).current
+    const scaleSearch = useRef(new Animated.Value(1)).current
     const [modalVisible, setModalVisible] = useState(false)
     const [modalCreateRoom, setModalCreateRoom] = useState(false)
+    const [modalSearching, setModalSearching] = useState(false)
 
     useEffect(() => {
         getSessionUserAndRooms()
@@ -177,6 +179,39 @@ const Home = (props: PropsList) => {
                 }
             </ScrollView>
             
+            <Animated.View
+                style = {{
+                    position: 'absolute',
+                    bottom: 75, right: 20,
+                    backgroundColor: '#48dbfb',
+                    borderRadius: 40,
+                    padding: 10,
+                    transform: [{scale: scaleSearch}]
+                }}
+            >
+                <Pressable
+                    onPress = {() => setModalSearching(true)}
+                    onPressIn = {() => {
+                        Animated.timing(scaleSearch, {
+                            toValue: 0.8,
+                            duration: 100,
+                            useNativeDriver: true
+                        }).start()
+                    }}
+                    onPressOut = {() => {
+                        Animated.timing(scaleSearch, {
+                            toValue: 1,
+                            duration: 100,
+                            useNativeDriver: true
+                        }).start()
+                    }}
+                >
+                    <Image
+                        source = {require('../images/search.png')}
+                        style = {{ width: 18, height: 18, tintColor: 'white' }}
+                    />
+                </Pressable>
+            </Animated.View>
             <Animated.View
                 style = {{
                     position: 'absolute',
@@ -380,6 +415,84 @@ const Home = (props: PropsList) => {
                                 <Text style = {{ color: 'white', textAlign: 'center' }} >
                                     BUAT
                                 </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                visible = {modalSearching}
+                transparent = {true}
+            >
+                <View
+                    style = {{
+                        flex: 1
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress = {() => setModalSearching(false)}
+                        style = {{
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'rgba(0,0,0,0.5)'
+                        }}
+                    />
+                    <View
+                        style = {{
+                            position: 'absolute',
+                            width,
+                            height: height * 0.75,
+                            bottom: 0,
+                            backgroundColor: 'white',
+                            borderTopEndRadius: 20,
+                            borderTopStartRadius: 20,
+                            padding: 20,
+                            flex:1,
+                        }}
+                    >
+                        <Text
+                            style = {{
+                                fontFamily: OpenSans.Regular,
+                                textAlign: 'center'
+                            }}
+                        >
+                            Searching User
+                        </Text>
+                        <View style = {{flex: 1}} >
+                            <ScrollView></ScrollView>
+                        </View>
+                        <View style = {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
+                            <TextInput
+                                returnKeyType = {'search'}
+                                placeholder = 'searching user...'
+                                style = {{
+                                    borderColor: '#222f3e',
+                                    borderWidth: 1,
+                                    paddingHorizontal: 10,
+                                    marginVertical: 5,
+                                    borderRadius: 10,
+                                    fontFamily: OpenSans.Regular,
+                                    flex: 1,
+                                    marginRight: 10
+                                }}
+                            />
+                            <TouchableOpacity
+                                style = {{
+                                    backgroundColor: '#48dbfb',
+                                    padding: 12,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderRadius: 10
+                                }}
+                            >
+                                <Image
+                                    source = {require('../images/search.png')}
+                                    style = {{
+                                        width: 17,
+                                        height: 17,
+                                        tintColor: 'white'
+                                    }}
+                                />
                             </TouchableOpacity>
                         </View>
                     </View>
