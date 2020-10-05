@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, StatusBar } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { StackParamsList } from '../references/types/navigator'
@@ -14,7 +14,7 @@ const SplashScreen = (props: PropsList) => {
     const { OpenSans } = Fonts
     const { navigation } = props
 
-    useEffect(() => {
+    useEffect(() => {        
         setTimeout(async() => {
             const sessionUser = await AsyncStorage.getItem('SessionUser')
 
@@ -27,6 +27,8 @@ const SplashScreen = (props: PropsList) => {
     }, [])
 
     return (
+        <>
+        <StatusBar barStyle='dark-content' />
         <View style = {{ flex: 1, alignItems: 'center', justifyContent: 'center'}} >
             <LinearGradient
                 colors = {['#FFF', '#48dbfb']}
@@ -57,6 +59,7 @@ const SplashScreen = (props: PropsList) => {
                 Skuy Chat
             </Text>
         </View>
+        </>
     )
 }
 

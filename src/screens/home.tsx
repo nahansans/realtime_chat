@@ -10,7 +10,8 @@ import {
     Animated, 
     Dimensions, 
     Modal, 
-    TextInput, } from 'react-native'
+    TextInput, 
+    StatusBar } from 'react-native'
 
 import { Fonts } from './../references/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -40,18 +41,50 @@ const Home = (props: PropsList) => {
 
     const [sessionUser, setSessionUser] = useState({} as SessionUserType)
     const [rooms, setRooms] = useState([] as RoomType[])
-    const scale = useRef(new Animated.Value(1)).current
-    const scaleSearch = useRef(new Animated.Value(1)).current
+    
     const [modalVisible, setModalVisible] = useState(false)
     const [modalCreateRoom, setModalCreateRoom] = useState(false)
     const [modalSearching, setModalSearching] = useState(false)
     const [users, setUsers] = useState([] as usersType[])
+
+    const scale = useRef(new Animated.Value(0)).current
+    const scaleSearch = useRef(new Animated.Value(0)).current
+    const scaleGradient = useRef(new Animated.Value(0)).current
     const modalOpacity = useRef(new Animated.Value(0)).current
+    const circleView = useRef(new Animated.Value(0)).current
 
 
-    useEffect(() => {        
+
+    useEffect(() => {    
+        StatusBar.setBarStyle('light-content')    
         getSessionUserAndRooms()
-        // search()
+        Animated.parallel([
+            Animated.timing(circleView, {
+                toValue: 1,
+                duration: 300,
+                delay: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scale, {
+                toValue: 1,
+                duration: 300,
+                delay: 200,
+                useNativeDriver: true
+            }),
+            Animated.timing(scaleSearch, {
+                toValue: 1,
+                duration: 300,
+                delay: 200,
+                useNativeDriver: true
+            }),
+            Animated.timing(scaleGradient, {
+                toValue: 1,
+                duration: 300,
+                delay: 200,
+                useNativeDriver: true
+            })
+        ]).start()
+
     }, [])
 
     async function getSessionUserAndRooms() {
@@ -84,13 +117,14 @@ const Home = (props: PropsList) => {
                 flex: 1,
             }}
         >
-            <View
+            <Animated.View
                 style = {{
                     backgroundColor: 'white',
                     height,
                     width,
                     position: 'absolute',
-                    borderBottomEndRadius: 600
+                    borderBottomEndRadius: 600,
+                    transform: [{scaleY: circleView}]
                 }}
             />
             <View
@@ -102,16 +136,25 @@ const Home = (props: PropsList) => {
                     paddingTop: 30
                 }}
             >
-                <LinearGradient
-                    colors = {['#48dbfb', '#10ac84']}
-                    start = {{x: 0, y: 1}}
-                    end = {{x: 1, y: 0}}
+                <Animated.View
                     style = {{
                         position: 'absolute',
                         top: 0, left: 0, right: 0, bottom: 0,
-                        opacity: 0.8
+                        transform: [{scaleX: scaleGradient}],
+                        opacity: scaleGradient
                     }}
-                />
+                >
+                    <LinearGradient
+                        colors = {['#48dbfb', '#10ac84']}
+                        start = {{x: 0, y: 1}}
+                        end = {{x: 1, y: 0}}
+                        style = {{
+                            position: 'absolute',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            opacity: 0.8
+                        }}
+                    />
+                </Animated.View>
                 <View
                     style = {{
                         flexDirection: 'row',

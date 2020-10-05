@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef} from 'react'
-import { View, Text, Image, TextInput, TouchableOpacity, Pressable, Animated, Easing, ActivityIndicator } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, Pressable, Animated, Easing, ActivityIndicator, StatusBar } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { StackParamsList } from '../references/types/navigator'
@@ -31,7 +31,16 @@ const Register = (props: PropsList) => {
     
     const passwordRef = useRef<TextInput>(null)
 
+    const circleView = useRef(new Animated.Value(0)).current
+    
     useEffect(() => {
+        StatusBar.setBarStyle('dark-content')
+        Animated.timing(circleView, {
+            toValue: 1,
+            duration: 300,
+            delay: 200,
+            useNativeDriver: true,
+        }).start()
         getUsersData()
     }, [])
 
@@ -96,7 +105,7 @@ const Register = (props: PropsList) => {
                     top: 0, left: 0, right: 0, bottom: 0
                 }}
             />
-            <View
+            <Animated.View
                 style = {{
                     height: 500,
                     width: 500,
@@ -105,7 +114,8 @@ const Register = (props: PropsList) => {
                     position: 'absolute',
                     top: -50,
                     left: -130,
-                    backgroundColor: '#FFF'
+                    backgroundColor: '#FFF',
+                    transform: [{scaleY: circleView}]
                 }}
             />
             <View

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, SafeAreaView, Image, TouchableOpacity, Dimensions } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
+import { View, Text, ScrollView, SafeAreaView, Image, TouchableOpacity, Dimensions, Animated, StatusBar } from 'react-native'
 
 import { Fonts } from './../references/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -28,10 +28,18 @@ const Chat = (props: PropsList) => {
     const [sessionUser, setSessionUser] = useState({} as SessionUserType)
     const [room, setRoom] = useState({} as RoomType)
     const [inputText, setInputText] = useState('')
+    const scaleGradient = useRef(new Animated.Value(0)).current
 
     useEffect(() => {
+        StatusBar.setBarStyle('light-content')
         if(route.params.roomIndex != undefined) {
             getSessionUserAndRooms()
+            Animated.timing(scaleGradient, {
+                toValue: 1,
+                duration: 300,
+                delay: 100,
+                useNativeDriver: true
+            }).start()
         }
     }, [])
 
@@ -77,16 +85,25 @@ const Chat = (props: PropsList) => {
                     alignItems: 'center',
                 }}
             >
-                <LinearGradient
-                    colors = {['#48dbfb', '#10ac84']}
-                    start = {{x: 0, y: 1}}
-                    end = {{x: 1, y: 0}}
+                <Animated.View
                     style = {{
                         position: 'absolute',
                         top: 0, left: 0, right: 0, bottom: 0,
-                        opacity: 0.8
+                        transform: [{scaleX: scaleGradient}],
+                        opacity: scaleGradient
                     }}
-                />
+                >
+                    <LinearGradient
+                        colors = {['#48dbfb', '#10ac84']}
+                        start = {{x: 0, y: 1}}
+                        end = {{x: 1, y: 0}}
+                        style = {{
+                            position: 'absolute',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            opacity: 0.8
+                        }}
+                    />
+                </Animated.View>
                 <TouchableOpacity
                     onPress = {() => navigation.goBack()}
                     activeOpacity = {0.7}
