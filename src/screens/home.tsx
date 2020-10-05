@@ -35,6 +35,7 @@ const Home = (props: PropsList) => {
     const [modalCreateRoom, setModalCreateRoom] = useState(false)
     const [modalSearching, setModalSearching] = useState(false)
     const [users, setUsers] = useState([] as usersType[])
+    const modalOpacity = useRef(new Animated.Value(0)).current
 
 
     useEffect(() => {
@@ -139,7 +140,15 @@ const Home = (props: PropsList) => {
                         Skuy Chat
                     </Text>
                     <TouchableOpacity
-                        onPress = {() => setModalVisible(true)}
+                        onPress = {() => {
+                            setModalVisible(true)
+                            Animated.timing(modalOpacity, {
+                                toValue: 1,
+                                duration: 1000,
+                                delay: 200,
+                                useNativeDriver: true
+                            }).start()
+                        }}
                     >
                         <Image
                             source = {require('../images/ic_keluar.png')}
@@ -223,7 +232,15 @@ const Home = (props: PropsList) => {
                 }}
             >
                 <Pressable
-                    onPress = {() => setModalSearching(true)}
+                    onPress = {() => {
+                        setModalSearching(true)
+                        Animated.timing(modalOpacity, {
+                            toValue: 1,
+                            duration: 1000,
+                            delay: 200,
+                            useNativeDriver: true
+                        }).start()
+                    }}
                     onPressIn = {() => {
                         Animated.timing(scaleSearch, {
                             toValue: 0.8,
@@ -256,7 +273,15 @@ const Home = (props: PropsList) => {
                 }}
             >
                 <Pressable
-                    onPress = {() => setModalCreateRoom(true)}
+                    onPress = {() => {
+                        setModalCreateRoom(true)
+                        Animated.timing(modalOpacity, {
+                            toValue: 1,
+                            duration: 100,
+                            delay: 200,
+                            useNativeDriver: true
+                        }).start()
+                    }}
                     onPressIn = {() => {
                         Animated.timing(scale, {
                             toValue: 0.7,
@@ -281,20 +306,38 @@ const Home = (props: PropsList) => {
             <Modal
                 visible = {modalVisible}
                 transparent = {true}
+                animationType = 'slide'
             >
                 <View
                     style = {{
                         flex: 1
                     }}
                 >
-                    <TouchableOpacity
-                        onPress = {() => setModalVisible(false)}
+                    <Animated.View
                         style = {{
                             width: '100%',
                             height: '100%',
-                            backgroundColor: 'rgba(0,0,0,0.5)'
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            opacity: modalOpacity
                         }}
-                    />
+                    >
+                        <TouchableOpacity
+                            onPress = {() => {
+                                Animated.timing(modalOpacity, {
+                                    toValue: 0,
+                                    duration: 100,
+                                    useNativeDriver: true
+                                }).start(() => {
+                                    setModalVisible(false)
+                                })
+                                
+                            }}
+                            style = {{
+                                width: '100%',
+                                height: '100%',
+                            }}
+                        />
+                    </Animated.View>
                     <View
                         style = {{
                             position: 'absolute',
@@ -328,7 +371,15 @@ const Home = (props: PropsList) => {
                         </Text>
                         <View style = {{flexDirection: 'row', marginTop: 10}} >
                             <TouchableOpacity
-                                onPress = {() => setModalVisible(false)}
+                                onPress = {() => {
+                                    Animated.timing(modalOpacity, {
+                                        toValue: 0,
+                                        duration: 100,
+                                        useNativeDriver: true
+                                    }).start(() => {
+                                        setModalVisible(false)
+                                    })
+                                }}
                                 style = {{
                                     backgroundColor: '#10ac84',
                                     borderColor: '#10ac84',
@@ -346,6 +397,11 @@ const Home = (props: PropsList) => {
                             <TouchableOpacity
                                 onPress = {async() => {
                                     await AsyncStorage.removeItem('SessionUser')
+                                    Animated.timing(modalOpacity, {
+                                        toValue: 0,
+                                        duration: 100,
+                                        useNativeDriver: true
+                                    }).start()
                                     setModalVisible(false)
                                     navigation.replace('Login')
                                 }}
@@ -369,20 +425,38 @@ const Home = (props: PropsList) => {
             <Modal
                 visible = {modalCreateRoom}
                 transparent = {true}
+                animationType = 'slide'
             >
                 <View
                     style = {{
                         flex: 1
                     }}
                 >
-                    <TouchableOpacity
-                        onPress = {() => setModalCreateRoom(false)}
+                    <Animated.View
                         style = {{
                             width: '100%',
                             height: '100%',
-                            backgroundColor: 'rgba(0,0,0,0.5)'
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            opacity: modalOpacity
                         }}
-                    />
+                    >
+                        <TouchableOpacity
+                            onPress = {() => {
+                                Animated.timing(modalOpacity, {
+                                    toValue: 0,
+                                    duration: 100,
+                                    useNativeDriver: true
+                                }).start(() => {
+                                    setModalCreateRoom(false)
+                                })
+                            }}
+                            style = {{
+                                width: '100%',
+                                height: '100%',
+                            }}
+                        />
+                    </Animated.View>
+                    
                     <View
                         style = {{
                             position: 'absolute',
@@ -417,7 +491,15 @@ const Home = (props: PropsList) => {
                         />
                         <View style = {{flexDirection: 'row', marginTop: 10, alignSelf: 'center'}} >
                             <TouchableOpacity
-                                onPress = {() => setModalCreateRoom(false)}
+                                onPress = {() => {
+                                    Animated.timing(modalOpacity, {
+                                        toValue: 0,
+                                        duration: 100,
+                                        useNativeDriver: true
+                                    }).start(() => {
+                                        setModalCreateRoom(false)
+                                    })
+                                }}
                                 style = {{
                                     borderColor: '#ee5253',
                                     borderWidth: 1,
@@ -456,23 +538,38 @@ const Home = (props: PropsList) => {
             <Modal
                 visible = {modalSearching}
                 transparent = {true}
+                animationType = 'slide'
             >
                 <View
                     style = {{
                         flex: 1
                     }}
                 >
-                    <TouchableOpacity
-                        onPress = {() => {
-                            setModalSearching(false)
-                            setUsers([])
-                        }}
+                    <Animated.View
                         style = {{
                             width: '100%',
                             height: '100%',
-                            backgroundColor: 'rgba(0,0,0,0.5)'
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            opacity: modalOpacity
                         }}
-                    />
+                    >
+                        <TouchableOpacity
+                            onPress = {() => {
+                                Animated.timing(modalOpacity, {
+                                    toValue: 0,
+                                    duration: 100,
+                                    useNativeDriver: true
+                                }).start(()=> {
+                                    setModalSearching(false)
+                                    setUsers([])
+                                })
+                            }}
+                            style = {{
+                                width: '100%',
+                                height: '100%',
+                            }}
+                        />
+                    </Animated.View>
                     <View
                         style = {{
                             position: 'absolute',
