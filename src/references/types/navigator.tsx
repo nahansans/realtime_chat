@@ -10,7 +10,7 @@ export type StackParamsList = {
     SplashScreen: undefined,
     Chat: {
         fromScreen: FromScreen,
-        roomIndex: number,
+        roomIndex?: number,
         withUser: string
     }
 }

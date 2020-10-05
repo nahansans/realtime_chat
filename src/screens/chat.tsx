@@ -30,7 +30,9 @@ const Chat = (props: PropsList) => {
     const [inputText, setInputText] = useState('')
 
     useEffect(() => {
-        getSessionUserAndRooms()
+        if(route.params.roomIndex != undefined) {
+            getSessionUserAndRooms()
+        }
     }, [])
 
     async function getSessionUserAndRooms() {
