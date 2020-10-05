@@ -14,7 +14,7 @@ const App = () => {
   
   return (
     <>
-      <StatusBar translucent backgroundColor='transparent' barStyle = 'dark-content' />
+      <StatusBar translucent backgroundColor='transparent' barStyle = 'light-content' />
       <NavigationContainer>
         <Stack.Navigator
           screenOptions = {{
