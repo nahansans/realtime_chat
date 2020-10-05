@@ -13,7 +13,8 @@ const Stack = createStackNavigator()
 const App = () => {
   
   return (
-    <>      
+    <>
+      <StatusBar translucent backgroundColor='transparent' barStyle = 'light-content' />
       <NavigationContainer>
         <Stack.Navigator
           screenOptions = {{

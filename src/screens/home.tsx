@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { View, Text, ScrollView, SafeAreaView, Image, TouchableOpacity, Pressable, Animated, Dimensions, Modal, TextInput } from 'react-native'
+import { 
+    View, 
+    Text, 
+    ScrollView, 
+    SafeAreaView, 
+    Image, 
+    TouchableOpacity, 
+    Pressable, 
+    Animated, 
+    Dimensions, 
+    Modal, 
+    TextInput, } from 'react-native'
 
 import { Fonts } from './../references/fonts';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -38,7 +49,7 @@ const Home = (props: PropsList) => {
     const modalOpacity = useRef(new Animated.Value(0)).current
 
 
-    useEffect(() => {
+    useEffect(() => {        
         getSessionUserAndRooms()
         // search()
     }, [])
@@ -80,6 +91,7 @@ const Home = (props: PropsList) => {
     }
 
     return(
+        <>
         <SafeAreaView
             style = {{
                 flex: 1,
@@ -99,7 +111,8 @@ const Home = (props: PropsList) => {
                     backgroundColor: '#0abde3',
                     paddingHorizontal: 20,
                     overflow: 'hidden',   
-                    paddingVertical: 10            
+                    paddingBottom: 10,
+                    paddingTop: 30
                 }}
             >
                 <LinearGradient
@@ -277,8 +290,7 @@ const Home = (props: PropsList) => {
                         setModalCreateRoom(true)
                         Animated.timing(modalOpacity, {
                             toValue: 1,
-                            duration: 100,
-                            delay: 200,
+                            duration: 1000,
                             useNativeDriver: true
                         }).start()
                     }}
@@ -304,6 +316,15 @@ const Home = (props: PropsList) => {
                 </Pressable>
             </Animated.View>
             <Modal
+                onRequestClose = {() => {
+                    Animated.timing(modalOpacity, {
+                        toValue: 0,
+                        duration: 100,
+                        useNativeDriver: true
+                    }).start(() => {
+                        setModalVisible(false)
+                    })
+                }}
                 visible = {modalVisible}
                 transparent = {true}
                 animationType = 'slide'
@@ -330,7 +351,6 @@ const Home = (props: PropsList) => {
                                 }).start(() => {
                                     setModalVisible(false)
                                 })
-                                
                             }}
                             style = {{
                                 width: '100%',
@@ -423,6 +443,15 @@ const Home = (props: PropsList) => {
                 </View>
             </Modal>
             <Modal
+                onRequestClose = {() => {
+                    Animated.timing(modalOpacity, {
+                        toValue: 0,
+                        duration: 100,
+                        useNativeDriver: true
+                    }).start(() => {
+                        setModalCreateRoom(false)
+                    })
+                }}
                 visible = {modalCreateRoom}
                 transparent = {true}
                 animationType = 'slide'
@@ -536,6 +565,16 @@ const Home = (props: PropsList) => {
                 </View>
             </Modal>
             <Modal
+                onRequestClose = {() => {
+                    Animated.timing(modalOpacity, {
+                        toValue: 0,
+                        duration: 100,
+                        useNativeDriver: true
+                    }).start(()=> {
+                        setModalSearching(false)
+                        setUsers([])
+                    })
+                }}
                 visible = {modalSearching}
                 transparent = {true}
                 animationType = 'slide'
@@ -659,6 +698,8 @@ const Home = (props: PropsList) => {
                 </View>
             </Modal>
         </SafeAreaView>
+    
+        </>
     )
 }
 

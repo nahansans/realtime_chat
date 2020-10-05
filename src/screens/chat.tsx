@@ -67,10 +67,12 @@ const Chat = (props: PropsList) => {
             <View
                 style = {{
                     backgroundColor: '#0abde3',
-                    padding: 20,
-                    overflow: 'hidden',  
-                    flexDirection: 'row',                    
-                    alignItems: 'center'
+                    paddingHorizontal: 20,
+                    overflow: 'hidden',   
+                    paddingBottom: 20,
+                    paddingTop: 30,
+                    flexDirection: 'row',
+                    alignItems: 'center',
                 }}
             >
                 <LinearGradient
@@ -161,7 +163,8 @@ const Chat = (props: PropsList) => {
                                             borderRadius: 10,
                                             marginLeft: 50,
                                             marginRight: 10,
-                                            marginBottom: 10
+                                            marginBottom: 10,
+                                            marginTop: 10
                                         }}
                                     >
                                         <Text
@@ -185,7 +188,7 @@ const Chat = (props: PropsList) => {
                                             borderRadius: 10,
                                             marginLeft: 10,
                                             marginRight: 50,
-                                            marginBottom: 10
+                                            marginTop: 10
                                         }}
                                     >
                                         <Text
