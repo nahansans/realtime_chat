@@ -49,7 +49,7 @@ const Login = (props: PropsList) => {
             database()
             .ref('users')
             .once('value')
-            .then((snapshot: any) => {
+            .then(snapshot => {
                 setisLoading(false)
 
                 // console.log(snapshot.val())
@@ -58,7 +58,7 @@ const Login = (props: PropsList) => {
                 for (let index = 0; index < usersData.length; index++) {
                     const currentIndexUserData = usersData[index];
 
-                    if (username === currentIndexUserData.username && password === currentIndexUserData.password) {
+                    if (username.toLowerCase() === currentIndexUserData.username.toLowerCase() && password === currentIndexUserData.password) {
                         navigation.replace('Home')
 
                         AsyncStorage.setItem('SessionUser', JSON.stringify(currentIndexUserData))

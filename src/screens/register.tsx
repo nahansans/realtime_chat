@@ -58,7 +58,7 @@ const Register = (props: PropsList) => {
         for (let index = 0; index < usersData.length; index++) {
             const element = usersData[index];
             
-            if (username === element.username) {
+            if (username.toLowerCase() === element.username.toLowerCase()) {
                 Snackbar.show({
                     text: 'Username Sudah Digunakan',
                     duration: Snackbar.LENGTH_SHORT,
@@ -76,7 +76,8 @@ const Register = (props: PropsList) => {
         let newUsersData = JSON.parse(JSON.stringify(usersData)) as usersDataType[]
 
         newUsersData.push({
-            username,password
+            username: username.toLowerCase(),
+            password
         })   
 
         let usersDataToSend = {} as any
