@@ -56,8 +56,7 @@ const Home = (props: PropsList) => {
 
     const statusBarHeight = getStatusBarHeight()
 
-    useEffect(() => {
-        StatusBar.setBarStyle('light-content')          
+    useEffect(() => {                
         getSessionUserAndRooms()
         Animated.parallel([
             Animated.timing(circleView, {
@@ -117,6 +116,7 @@ const Home = (props: PropsList) => {
 
     return(
         <>
+        <StatusBar translucent backgroundColor='transparent' barStyle = 'light-content' />
         <SafeAreaView
             style = {{
                 flex: 1,

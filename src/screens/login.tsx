@@ -39,7 +39,7 @@ const Login = (props: PropsList) => {
         }).start()
     }, [])
 
-    const login = () => {
+    const login = async() => {
         setisLoading(true)
         if (username !== '' && password !== '') {
             // setTimeout(() => {
@@ -49,7 +49,7 @@ const Login = (props: PropsList) => {
             database()
             .ref('users')
             .once('value')
-            .then(snapshot => {
+            .then(async(snapshot) => {
                 setisLoading(false)
 
                 // console.log(snapshot.val())
@@ -59,9 +59,19 @@ const Login = (props: PropsList) => {
                     const currentIndexUserData = usersData[index];
 
                     if (username.toLowerCase() === currentIndexUserData.username.toLowerCase() && password === currentIndexUserData.password) {
-                        navigation.replace('Home')
+                        let token = await AsyncStorage.getItem('token')
+                        database()
+                            .ref(`users/${index}`)
+                            .update({
+                                username,
+                                password,
+                                token
+                            })
+                            .then(() => {
+                                navigation.replace('Home')
 
-                        AsyncStorage.setItem('SessionUser', JSON.stringify(currentIndexUserData))
+                                AsyncStorage.setItem('SessionUser', JSON.stringify(currentIndexUserData))
+                            })
 
                         break
                     }

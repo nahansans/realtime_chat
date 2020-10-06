@@ -35,7 +35,6 @@ const Chat = (props: PropsList) => {
     const [roomIndex, setRoomIndex] = useState(0)
 
     useEffect(() => {
-        StatusBar.setBarStyle('light-content')
         console.log(route.params['roomIndex'])
         
         getSessionUserAndRooms()
@@ -125,6 +124,8 @@ const Chat = (props: PropsList) => {
     }
 
     return(
+        <>
+            <StatusBar translucent backgroundColor='transparent' barStyle = 'light-content' />
         <SafeAreaView
             style = {{
                 flex: 1,
@@ -331,6 +332,7 @@ const Chat = (props: PropsList) => {
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
+        </>
     )
 }
 

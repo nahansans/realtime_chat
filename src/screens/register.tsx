@@ -11,7 +11,8 @@ import AsyncStorage from '@react-native-community/async-storage'
 
 type usersDataType = {
     username: string,
-    password: any
+    password: string,
+    token: string
 }
 
 
@@ -82,7 +83,8 @@ const Register = (props: PropsList) => {
 
         newUsersData.push({
             username: username.toLowerCase(),
-            password
+            password,
+            token: ''
         })   
 
         let usersDataToSend = {} as any
