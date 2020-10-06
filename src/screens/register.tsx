@@ -49,26 +49,31 @@ const Register = (props: PropsList) => {
             .ref('users')
             .once('value')
             .then((snapshot: any) => {
-                setusersData(snapshot.val() as usersDataType[])
+                setusersData((snapshot.val() || []) as usersDataType[])
             })
     }
 
     function submit() {
         setisLoading(true)
-        for (let index = 0; index < usersData.length; index++) {
-            const element = usersData[index];
-            
-            if (username.toLowerCase() === element.username.toLowerCase()) {
-                Snackbar.show({
-                    text: 'Username Sudah Digunakan',
-                    duration: Snackbar.LENGTH_SHORT,
-                });
-                setisLoading(false)
 
-                break
-            } else {
-                register()
+        if(usersData.length > 0) {
+            for (let index = 0; index < usersData.length; index++) {
+                const element = usersData[index];
+                
+                if (username.toLowerCase() === element.username.toLowerCase()) {
+                    Snackbar.show({
+                        text: 'Username Sudah Digunakan',
+                        duration: Snackbar.LENGTH_SHORT,
+                    });
+                    setisLoading(false)
+    
+                    break
+                } else {
+                    register()
+                }
             }
+        } else {
+            register()
         }
     }
     function register() {        

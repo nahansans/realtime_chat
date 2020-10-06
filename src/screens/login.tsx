@@ -53,7 +53,7 @@ const Login = (props: PropsList) => {
                 setisLoading(false)
 
                 // console.log(snapshot.val())
-                const usersData = snapshot.val()
+                const usersData = snapshot.val() || []
                 
                 for (let index = 0; index < usersData.length; index++) {
                     const currentIndexUserData = usersData[index];
