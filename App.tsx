@@ -7,10 +7,37 @@ import Login from './src/screens/login';
 import Home from './src/screens/home';
 import Register from './src/screens/register';
 import Chat from './src/screens/chat';
+import messaging from '@react-native-firebase/messaging'
+import PushNotification from 'react-native-push-notification'
+import AsyncStorage from '@react-native-community/async-storage';
 
 const Stack = createStackNavigator()
 
 const App = () => {
+  let unsubcribeForegroundListener= undefined
+  async function startListeningMessage() {
+    const isPermitted = await getPermissionSuccessState()
+
+    if (isPermitted) {
+        const token = await messaging().getToken()
+
+        AsyncStorage.setItem('token', token)
+
+        unsubcribeForegroundListener = messaging().onMessage(remoteMessage => {
+          PushNotification.localNotification({
+            data: remoteMessage.data,
+            title: remoteMessage.notification?.title,
+            message: remoteMessage.notification?.body,
+            channelId: 'default',
+            playSound: true,
+            soundName: 'default',
+            importance: "high",
+            priority: 'high',
+            vibrate: true
+          })
+        })
+    }
+  }
   
   return (
     <>
@@ -48,4 +75,16 @@ const App = () => {
   )
 }
 
+async function getPermissionSuccessState() {
+  let isPermitted = false 
+  await messaging().hasPermission().then((hasPermission) => {
+    isPermitted = hasPermission ? hasPermission : false
+  })
+  
+  if (!isPermitted) {
+    await messaging().requestPermission().then(() => isPermitted == true)
+  }
+
+  return isPermitted
+}
 export default App

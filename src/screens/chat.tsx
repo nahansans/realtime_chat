@@ -296,6 +296,7 @@ const Chat = (props: PropsList) => {
                     }}
                 >
                     <TextInput
+                        placeholder = 'Type a message'
                         onSubmitEditing = {() => submit()}
                         onChangeText = {(newValue: string) => setInputText(newValue)}
                         style = {{
