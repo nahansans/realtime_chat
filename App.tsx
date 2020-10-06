@@ -37,6 +37,10 @@ const App = () => {
         })
     }
   }
+
+  useEffect(() => {
+    startListeningMessage()
+  }, [])
   
   return (
     <>
