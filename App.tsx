@@ -25,9 +25,8 @@ const App = () => {
 
         unsubcribeForegroundListener = messaging().onMessage(remoteMessage => {
           PushNotification.localNotification({
-            data: remoteMessage.data,
             title: remoteMessage.notification?.title,
-            message: remoteMessage.notification?.body,
+            message: remoteMessage.notification?.body!,
             channelId: 'default',
             playSound: true,
             soundName: 'default',
@@ -78,7 +77,7 @@ const App = () => {
 async function getPermissionSuccessState() {
   let isPermitted = false 
   await messaging().hasPermission().then((hasPermission) => {
-    isPermitted = hasPermission ? hasPermission : false
+    isPermitted = hasPermission ? true : false
   })
   
   if (!isPermitted) {
