@@ -84,11 +84,11 @@ const Home = (props: PropsList) => {
                 useNativeDriver: true
             })
         ]).start()
-
     }, [])
 
     async function getSessionUserAndRooms() {
         const recentSessionUser = JSON.parse(await AsyncStorage.getItem('SessionUser') as string) as SessionUserType
+        const token = await AsyncStorage.getItem('token')
 
         setSessionUser(recentSessionUser)
 
@@ -99,6 +99,23 @@ const Home = (props: PropsList) => {
 
             setRooms(roomsData)
         })
+        database()
+            .ref('users/')
+            .on('value', async(snapshot: any) => {
+                const usersData = snapshot.val() || []
+                
+                for (let index = 0; index < usersData.length; index++) {
+                    const currentIndexUserData = usersData[index];
+
+                    if (currentIndexUserData.username == recentSessionUser.username && currentIndexUserData.password == recentSessionUser.password) {
+                        if (currentIndexUserData.token != token) {
+                            await AsyncStorage.removeItem('SessionUser')
+                            modalTokenExpired(true)
+                        }
+                    }
+                    break
+                }
+            })
     }
     const textInputRef = useRef<TextInput>(null)
 
@@ -792,6 +809,78 @@ const Home = (props: PropsList) => {
     
         </>
     )
+
+    function modalTokenExpired (visible: boolean) {
+        return (
+            <Modal
+                visible = {visible}
+                transparent = {true}
+                animationType = 'fade'
+            >
+                <View
+                    style = {{
+                        flex: 1
+                    }}
+                >
+                    <Animated.View
+                        style = {{
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            opacity: 0.8
+                        }}
+                    >
+                    </Animated.View>
+                    
+                    <View
+                        style = {{
+                            position: 'absolute',
+                            width,
+                            height: height * 0.3,
+                            bottom: 0,
+                            backgroundColor: 'white',
+                            borderTopEndRadius: 20,
+                            borderTopStartRadius: 20,
+                            padding: 20,
+                            flex:1,
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <Text
+                            style = {{
+                                fontFamily: OpenSans.Regular,
+                                textAlign: 'center'
+                            }}
+                        >
+                            Token Has Expired
+                        </Text>
+                        <View style = {{flexDirection: 'row', marginTop: 10, alignSelf: 'center'}} >
+                            <TouchableOpacity
+                                onPress = {() => {
+                                    StatusBar.setHidden(false)
+                                    navigation.replace('Login')
+                                }}
+                                style = {{
+                                    backgroundColor: '#10ac84',
+                                    borderColor: '#10ac84',
+                                    borderWidth: 1,
+                                    borderRadius: 10,
+                                    paddingHorizontal: 20,
+                                    paddingVertical: 10,
+                                    marginLeft: 5,
+                                }}
+                            >
+                                <Text style = {{ color: 'white', textAlign: 'center' }} >
+                                    Oke
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        
+        )
+    }
 }
 
 export default Home
