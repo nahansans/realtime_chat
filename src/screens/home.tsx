@@ -89,13 +89,17 @@ const Home = (props: PropsList) => {
     }, [])
 
     async function getSessionUserAndRooms() {
-        const sessionUser = await AsyncStorage.getItem('SessionUser')
+        const recentSessionUser = JSON.parse(await AsyncStorage.getItem('SessionUser') as string) as SessionUserType
 
-        setSessionUser(JSON.parse(sessionUser!) as SessionUserType)
+        setSessionUser(recentSessionUser)
 
         database()
         .ref('/rooms/')
-        .on('value', (snapshot: any) => setRooms((snapshot.val() || []) as RoomType[]))
+        .on('value', (snapshot: any) => {
+            let roomsData = ((snapshot.val() || []) as RoomType[]).filter(room => room.participants.includes(recentSessionUser.username))
+
+            setRooms(roomsData)
+        })
     }
     const textInputRef = useRef<TextInput>(null)
 
