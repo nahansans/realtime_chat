@@ -69,7 +69,7 @@ const Chat = (props: PropsList) => {
         if (inputText !== '') {
             if (route.params['roomIndex'] == undefined) {
                 if (roomIndex == 0) {
-                    const newRoomData = JSON.parse(JSON.stringify(startChatRoom)) as RoomType[]
+                    const newRoomData = startChatRoom == null ? [] as RoomType[] : JSON.parse(JSON.stringify(startChatRoom)) as RoomType[]
                     newRoomData.push({
                         participants: [sessionUser.username, route.params['withUser']],
                         messages: [{

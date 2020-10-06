@@ -114,6 +114,41 @@ const Home = (props: PropsList) => {
         })
     }    
 
+    const logout = async() => {
+        database()
+            .ref('users')
+            .once('value')
+            .then(snapshot => {
+                const usersData = snapshot.val() || []
+                
+                for (let index = 0; index < usersData.length; index++) {
+                    const currentIndexUserData = usersData[index];
+
+                    if (sessionUser.username === currentIndexUserData.username.toLowerCase() && sessionUser.password === currentIndexUserData.password) {                        
+                        database()
+                            .ref(`users/${index}`)
+                            .update({
+                                token: ''
+                            })
+                            .then(async() => {
+                                await AsyncStorage.removeItem('SessionUser')
+                                Animated.timing(modalOpacity, {
+                                    toValue: 0,
+                                    duration: 100,
+                                    useNativeDriver: true
+                                }).start(() => {
+                                    StatusBar.setHidden(false)
+                                    setModalVisible(false)
+                                    navigation.replace('Login')
+                                })
+                            })
+
+                        break
+                    }
+                }
+            })
+    }
+
     return(
         <>
         <StatusBar translucent backgroundColor='transparent' barStyle = 'light-content' />
@@ -458,18 +493,7 @@ const Home = (props: PropsList) => {
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                onPress = {async() => {
-                                    await AsyncStorage.removeItem('SessionUser')
-                                    Animated.timing(modalOpacity, {
-                                        toValue: 0,
-                                        duration: 100,
-                                        useNativeDriver: true
-                                    }).start(() => {
-                                        StatusBar.setHidden(false)
-                                        setModalVisible(false)
-                                        navigation.replace('Login')
-                                    })
-                                }}
+                                onPress = {logout}
                                 style = {{
                                     borderColor: '#ee5253',
                                     borderWidth: 1,
