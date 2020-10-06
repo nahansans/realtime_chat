@@ -15,6 +15,7 @@ import { SessionUserType } from '../references/types/session-user'
 import { RoomType } from '../references/types/room'
 import AsyncStorage from '@react-native-community/async-storage';
 import { string } from 'yargs';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Chat'>
@@ -27,20 +28,23 @@ const Chat = (props: PropsList) => {
 
     const [sessionUser, setSessionUser] = useState({} as SessionUserType)
     const [room, setRoom] = useState({} as RoomType)
+    const [startChatRoom, setStartChatRoom] = useState<RoomType[]>([])
     const [inputText, setInputText] = useState('')
     const scaleGradient = useRef(new Animated.Value(0)).current
+    const statusBarHeight = getStatusBarHeight()
+    const [roomIndex, setRoomIndex] = useState(0)
 
     useEffect(() => {
         StatusBar.setBarStyle('light-content')
-        if(route.params.roomIndex != undefined) {
-            getSessionUserAndRooms()
-            Animated.timing(scaleGradient, {
-                toValue: 1,
-                duration: 300,
-                delay: 100,
-                useNativeDriver: true
-            }).start()
-        }
+        console.log(route.params['roomIndex'])
+        
+        getSessionUserAndRooms()
+        Animated.timing(scaleGradient, {
+            toValue: 1,
+            duration: 300,
+            delay: 100,
+            useNativeDriver: true
+        }).start()            
     }, [])
 
     async function getSessionUserAndRooms() {
@@ -48,12 +52,55 @@ const Chat = (props: PropsList) => {
 
         setSessionUser(JSON.parse(sessionUser!) as SessionUserType)
 
-        database()
-        .ref(`/rooms/${route.params.roomIndex}`)
-        .on('value', (snapshot: any) => setRoom(snapshot.val() as RoomType))
+        if (route.params['roomIndex'] != undefined) {
+            database()
+                .ref(`/rooms/${route.params.roomIndex}`)
+                .on('value', (snapshot: any) => setRoom(snapshot.val() as RoomType))
+        } else {
+            database()
+            .ref('rooms')
+            .on('value', (snapshot: any) => {
+                setStartChatRoom(snapshot.val() as RoomType[])
+            })
+        }
+        
     }
 
     function submit() {
+        if (route.params['roomIndex'] == undefined) {
+            if (roomIndex == 0) {
+                const newRoomData = JSON.parse(JSON.stringify(startChatRoom)) as RoomType[]
+                newRoomData.push({
+                    participants: [sessionUser.username, route.params['withUser']],
+                    messages: [{
+                        sender: sessionUser.username,
+                        time: (new Date()).getTime(),
+                        text: inputText
+                    }]
+                })
+                let roomDataToSend = {} as any
+                for(let roomDataIndex = 0; roomDataIndex < newRoomData.length; roomDataIndex++) {
+                    roomDataToSend[roomDataIndex.toString()] = newRoomData[roomDataIndex]                    
+                }
+                setRoomIndex(newRoomData.length - 1)
+                console.log(newRoomData.length)
+                database()
+                    .ref(`/rooms/`)
+                    .update(roomDataToSend)
+                    .then(() => {
+                        setInputText('')
+                        getMessageAfterSubmit(newRoomData.length - 1)
+                    })
+            } else {
+                submitMessage(roomIndex)
+            }
+
+        } else {
+            submitMessage(route.params['roomIndex'])
+        }
+    }
+
+    const submitMessage = (index: any) => {
         const newRoomData = JSON.parse(JSON.stringify(room)) as RoomType
         
         newRoomData.messages?.push({
@@ -61,11 +108,18 @@ const Chat = (props: PropsList) => {
             time: (new Date()).getTime(),
             text: inputText
         })
-
         database()
-        .ref(`/rooms/${route.params.roomIndex}`)
+        .ref(`/rooms/${index}`)
         .update(newRoomData)
         .then(() => setInputText(''))
+    }
+
+    const getMessageAfterSubmit = (index: any) => {
+        database()
+            .ref(`/rooms/${index}`)
+            .on('value', (snapshot: any) => {
+                setRoom(snapshot.val() as RoomType)
+            })
     }
 
     return(
@@ -80,7 +134,7 @@ const Chat = (props: PropsList) => {
                     paddingHorizontal: 20,
                     overflow: 'hidden',   
                     paddingBottom: 20,
-                    paddingTop: 30,
+                    paddingTop: statusBarHeight,
                     flexDirection: 'row',
                     alignItems: 'center',
                 }}

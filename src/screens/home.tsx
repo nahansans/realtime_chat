@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import { SessionUserType } from '../references/types/session-user'
 import { RoomType } from '../references/types/room'
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Home'>
@@ -53,10 +54,10 @@ const Home = (props: PropsList) => {
     const modalOpacity = useRef(new Animated.Value(0)).current
     const circleView = useRef(new Animated.Value(0)).current
 
+    const statusBarHeight = getStatusBarHeight()
 
-
-    useEffect(() => {    
-        StatusBar.setBarStyle('light-content')    
+    useEffect(() => {
+        StatusBar.setBarStyle('light-content')          
         getSessionUserAndRooms()
         Animated.parallel([
             Animated.timing(circleView, {
@@ -132,8 +133,8 @@ const Home = (props: PropsList) => {
                     backgroundColor: '#0abde3',
                     paddingHorizontal: 20,
                     overflow: 'hidden',   
-                    paddingBottom: 10,
-                    paddingTop: 30
+                    paddingBottom: 10,                    
+                    paddingTop: statusBarHeight
                 }}
             >
                 <Animated.View
@@ -184,6 +185,7 @@ const Home = (props: PropsList) => {
                     </Text>
                     <TouchableOpacity
                         onPress = {() => {
+                            StatusBar.setHidden(true)
                             setModalVisible(true)
                             Animated.timing(modalOpacity, {
                                 toValue: 1,
@@ -278,6 +280,7 @@ const Home = (props: PropsList) => {
             >
                 <Pressable
                     onPress = {() => {
+                        StatusBar.setHidden(true)
                         setModalSearching(true)
                         Animated.timing(modalOpacity, {
                             toValue: 1,
@@ -319,6 +322,7 @@ const Home = (props: PropsList) => {
             >
                 <Pressable
                     onPress = {() => {
+                        StatusBar.setHidden(true)
                         setModalCreateRoom(true)
                         Animated.timing(modalOpacity, {
                             toValue: 1,
@@ -354,6 +358,7 @@ const Home = (props: PropsList) => {
                         duration: 100,
                         useNativeDriver: true
                     }).start(() => {
+                        StatusBar.setHidden(false)
                         setModalVisible(false)
                     })
                 }}
@@ -381,6 +386,7 @@ const Home = (props: PropsList) => {
                                     duration: 100,
                                     useNativeDriver: true
                                 }).start(() => {
+                                    StatusBar.setHidden(false)
                                     setModalVisible(false)
                                 })
                             }}
@@ -429,6 +435,7 @@ const Home = (props: PropsList) => {
                                         duration: 100,
                                         useNativeDriver: true
                                     }).start(() => {
+                                        StatusBar.setHidden(false)
                                         setModalVisible(false)
                                     })
                                 }}
@@ -453,9 +460,11 @@ const Home = (props: PropsList) => {
                                         toValue: 0,
                                         duration: 100,
                                         useNativeDriver: true
-                                    }).start()
-                                    setModalVisible(false)
-                                    navigation.replace('Login')
+                                    }).start(() => {
+                                        StatusBar.setHidden(false)
+                                        setModalVisible(false)
+                                        navigation.replace('Login')
+                                    })
                                 }}
                                 style = {{
                                     borderColor: '#ee5253',
@@ -481,6 +490,7 @@ const Home = (props: PropsList) => {
                         duration: 100,
                         useNativeDriver: true
                     }).start(() => {
+                        StatusBar.setHidden(false)
                         setModalCreateRoom(false)
                     })
                 }}
@@ -508,6 +518,7 @@ const Home = (props: PropsList) => {
                                     duration: 100,
                                     useNativeDriver: true
                                 }).start(() => {
+                                    StatusBar.setHidden(false)
                                     setModalCreateRoom(false)
                                 })
                             }}
@@ -558,6 +569,7 @@ const Home = (props: PropsList) => {
                                         duration: 100,
                                         useNativeDriver: true
                                     }).start(() => {
+                                        StatusBar.setHidden(false)
                                         setModalCreateRoom(false)
                                     })
                                 }}
@@ -576,6 +588,7 @@ const Home = (props: PropsList) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress = {() => {
+                                    StatusBar.setHidden(false)
                                     setModalCreateRoom(false)
                                 }}
                                 style = {{
@@ -598,6 +611,7 @@ const Home = (props: PropsList) => {
             </Modal>
             <Modal
                 onRequestClose = {() => {
+                    StatusBar.setHidden(false)
                     Animated.timing(modalOpacity, {
                         toValue: 0,
                         duration: 100,
@@ -611,21 +625,21 @@ const Home = (props: PropsList) => {
                 transparent = {true}
                 animationType = 'slide'
             >
-                <View
+                <SafeAreaView
                     style = {{
-                        flex: 1
+                        flex: 1,
                     }}
                 >
                     <Animated.View
                         style = {{
-                            width: '100%',
-                            height: '100%',
+                            flex: 1,
                             backgroundColor: 'rgba(0,0,0,0.5)',
-                            opacity: modalOpacity
+                            opacity: modalOpacity,
                         }}
                     >
                         <TouchableOpacity
                             onPress = {() => {
+                                StatusBar.setHidden(false)
                                 Animated.timing(modalOpacity, {
                                     toValue: 0,
                                     duration: 100,
@@ -702,7 +716,7 @@ const Home = (props: PropsList) => {
                                                             selectedRoomIndex = roomIndex
                                                         }
                                                     }
-                                                    
+                                                    StatusBar.setHidden(false)
                                                     setUsers([])
                                                     setModalSearching(false)
 
@@ -744,7 +758,7 @@ const Home = (props: PropsList) => {
                             </ScrollView>
                         </View>
                     </View>
-                </View>
+                </SafeAreaView>
             </Modal>
         </SafeAreaView>
     
