@@ -67,36 +67,38 @@ const Chat = (props: PropsList) => {
     }
 
     function submit() {
-        if (route.params['roomIndex'] == undefined) {
-            if (roomIndex == 0) {
-                const newRoomData = JSON.parse(JSON.stringify(startChatRoom)) as RoomType[]
-                newRoomData.push({
-                    participants: [sessionUser.username, route.params['withUser']],
-                    messages: [{
-                        sender: sessionUser.username,
-                        time: (new Date()).getTime(),
-                        text: inputText
-                    }]
-                })
-                let roomDataToSend = {} as any
-                for(let roomDataIndex = 0; roomDataIndex < newRoomData.length; roomDataIndex++) {
-                    roomDataToSend[roomDataIndex.toString()] = newRoomData[roomDataIndex]                    
-                }
-                setRoomIndex(newRoomData.length - 1)
-                console.log(newRoomData.length)
-                database()
-                    .ref(`/rooms/`)
-                    .update(roomDataToSend)
-                    .then(() => {
-                        setInputText('')
-                        getMessageAfterSubmit(newRoomData.length - 1)
+        if (inputText !== '') {
+            if (route.params['roomIndex'] == undefined) {
+                if (roomIndex == 0) {
+                    const newRoomData = JSON.parse(JSON.stringify(startChatRoom)) as RoomType[]
+                    newRoomData.push({
+                        participants: [sessionUser.username, route.params['withUser']],
+                        messages: [{
+                            sender: sessionUser.username,
+                            time: (new Date()).getTime(),
+                            text: inputText
+                        }]
                     })
+                    let roomDataToSend = {} as any
+                    for(let roomDataIndex = 0; roomDataIndex < newRoomData.length; roomDataIndex++) {
+                        roomDataToSend[roomDataIndex.toString()] = newRoomData[roomDataIndex]                    
+                    }
+                    setRoomIndex(newRoomData.length - 1)
+                    console.log(newRoomData.length)
+                    database()
+                        .ref(`/rooms/`)
+                        .update(roomDataToSend)
+                        .then(() => {
+                            setInputText('')
+                            getMessageAfterSubmit(newRoomData.length - 1)
+                        })
+                } else {
+                    submitMessage(roomIndex)
+                }
+    
             } else {
-                submitMessage(roomIndex)
+                submitMessage(route.params['roomIndex'])
             }
-
-        } else {
-            submitMessage(route.params['roomIndex'])
         }
     }
 
