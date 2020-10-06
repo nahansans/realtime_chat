@@ -49,7 +49,7 @@ const Login = (props: PropsList) => {
             database()
             .ref('users')
             .once('value')
-            .then(snapshot => {
+            .then((snapshot: any) => {
                 setisLoading(false)
 
                 // console.log(snapshot.val())

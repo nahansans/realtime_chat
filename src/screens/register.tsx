@@ -48,7 +48,7 @@ const Register = (props: PropsList) => {
         database()
             .ref('users')
             .once('value')
-            .then(snapshot => {
+            .then((snapshot: any) => {
                 setusersData(snapshot.val() as usersDataType[])
             })
     }
@@ -89,7 +89,7 @@ const Register = (props: PropsList) => {
         .ref(`/users/`)
         .update(usersDataToSend)
         .then(() => {
-            navigation.replace('Login')
+            navigation.navigate('Login')
             
             setisLoading(false)
         })
