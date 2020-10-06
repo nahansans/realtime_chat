@@ -33,6 +33,7 @@ const Chat = (props: PropsList) => {
     const scaleGradient = useRef(new Animated.Value(0)).current
     const statusBarHeight = getStatusBarHeight()
     const [roomIndex, setRoomIndex] = useState(0)
+    const [token, setToken] = useState('')
 
     useEffect(() => {
         console.log(route.params['roomIndex'])
@@ -62,6 +63,23 @@ const Chat = (props: PropsList) => {
                 setStartChatRoom(snapshot.val() as RoomType[])
             })
         }
+
+        database()
+            .ref('/users/')
+            .once('value')
+            .then(snapshot => {
+                const usersData = snapshot.val() || []
+                
+                for (let index = 0; index < usersData.length; index++) {
+                    const currentIndexUserData = usersData[index];
+
+                    if (currentIndexUserData.username == route.params['withUser']) {
+                        setToken(currentIndexUserData.token)
+
+                        break
+                    }
+                }
+            })
         
     }
 
@@ -112,7 +130,28 @@ const Chat = (props: PropsList) => {
         database()
         .ref(`/rooms/${index}`)
         .update(newRoomData)
-        .then(() => setInputText(''))
+        .then(() => {
+            fetch(
+                'https://fcm.googleapis.com/fcm/send',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'AAAAJDBaOnc:APA91bFUJBKT03Yt5ZNayYwqn4waoeteuXIpPL4JvtPrw3PwtwEELYnMyZgqt5RMMndSwkPnj7D9RO8FDm3PdE00EE7shaElvlhF5PfBbF8enmyW-hraXuqMqxLMcCfki_4ZQQ16qxlL',
+                    },
+                    body: JSON.stringify({
+                        notification: {
+                            body: inputText,
+                            title: sessionUser.username
+                        },
+                        to: token
+                    })
+                }
+            )
+            .catch(error => console.warn(error))
+
+            setInputText('')
+        })
     }
 
     const getMessageAfterSubmit = (index: any) => {
