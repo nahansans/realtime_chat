@@ -207,8 +207,8 @@ const Chat = (props: PropsList) => {
                     backgroundColor: mode == '' ? '#0abde3' : '#1D1D1D',
                     paddingHorizontal: 20,
                     overflow: 'hidden',   
-                    paddingBottom: 20,
-                    paddingTop: statusBarHeight,
+                    paddingBottom: 10,
+                    paddingTop: statusBarHeight + 10,
                     flexDirection: 'row',
                     alignItems: 'center',
                 }}
