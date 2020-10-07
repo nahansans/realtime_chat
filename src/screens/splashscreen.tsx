@@ -10,6 +10,11 @@ type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'SplashScreen'>
 }
 
+type notificationProps = {
+    roomIndex: any,
+    withUser: any
+}
+
 const SplashScreen = (props: PropsList) => {
     const { OpenSans } = Fonts
     const { navigation } = props
@@ -17,11 +22,21 @@ const SplashScreen = (props: PropsList) => {
     useEffect(() => {        
         setTimeout(async() => {
             const sessionUser = await AsyncStorage.getItem('SessionUser')
-
-            if(sessionUser == null) {
+            const sessionNotification = await AsyncStorage.getItem('notification')
+            console.log(sessionNotification)
+            if(sessionUser == null) {                
                 navigation.replace('Login')
             } else {
-                navigation.replace('Home')
+                if (sessionNotification != null) {
+                    const sessionNotificationData = JSON.parse(sessionNotification) as notificationProps
+                    navigation.replace('Chat', {
+                        fromScreen: 'Home',
+                        roomIndex: sessionNotificationData.roomIndex,
+                        withUser: sessionNotificationData.withUser
+                    })
+                } else {
+                    navigation.replace('Home')
+                }
             }
         }, 1000);
     }, [])

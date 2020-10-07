@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler'
 import PushNotification from 'react-native-push-notification'
+import AsyncStorage from '@react-native-community/async-storage';
 
 /**
  * @format
@@ -18,8 +19,8 @@ PushNotification.createChannel(
 
 PushNotification.configure(
     {
-        onNotification: notification => {
-            console.log('Do Something After Notification Tapped')
+        onNotification: async(notification) => {            
+            await AsyncStorage.setItem('notification', JSON.stringify(notification.data))
         }
     }
 )

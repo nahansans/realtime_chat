@@ -34,6 +34,10 @@ type PropsList = {
 type usersType = {
     username: string
 }
+type notificationProps = {
+    roomIndex: any,
+    withUser: any
+}
 
 const Home = (props: PropsList) => {
     const { navigation, route } = props
@@ -58,6 +62,7 @@ const Home = (props: PropsList) => {
 
     useEffect(() => {                
         getSessionUserAndRooms()
+        checkNotificationSession()
         Animated.parallel([
             Animated.timing(circleView, {
                 toValue: 1,
@@ -85,6 +90,19 @@ const Home = (props: PropsList) => {
             })
         ]).start()
     }, [])
+
+    async function checkNotificationSession() {
+        const sessionNotification = await AsyncStorage.getItem('notification')
+        console.log(sessionNotification)
+        if (sessionNotification != null) {
+            const sessionNotificationData = JSON.parse(sessionNotification) as notificationProps
+            navigation.navigate('Chat', {
+                fromScreen: 'Home',
+                roomIndex: sessionNotificationData.roomIndex,
+                withUser: sessionNotificationData.withUser
+            })
+        }
+    }
 
     async function getSessionUserAndRooms() {
         const recentSessionUser = JSON.parse(await AsyncStorage.getItem('SessionUser') as string) as SessionUserType

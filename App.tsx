@@ -32,7 +32,8 @@ const App = () => {
             soundName: 'default',
             importance: "high",
             priority: 'high',
-            vibrate: true
+            vibrate: true,
+            userInfo: remoteMessage.data
           })
         })
     }

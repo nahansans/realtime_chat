@@ -44,8 +44,16 @@ const Chat = (props: PropsList) => {
             duration: 300,
             delay: 100,
             useNativeDriver: true
-        }).start()            
+        }).start()
+        checkSessionNotification()
     }, [])
+
+    async function checkSessionNotification() {
+        const notificationData = await AsyncStorage.getItem('notification')
+        if (notificationData != null) {
+            await AsyncStorage.removeItem('notification')
+        }
+    }
 
     async function getSessionUserAndRooms() {
         const sessionUser = await AsyncStorage.getItem('SessionUser')
@@ -105,7 +113,9 @@ const Chat = (props: PropsList) => {
                     database()
                         .ref(`/rooms/`)
                         .update(roomDataToSend)
-                        .then(() => {
+                        .then(async() => {
+                            await sendNotification()
+
                             setInputText('')
                             getMessageAfterSubmit(newRoomData.length - 1)
                         })
@@ -130,25 +140,8 @@ const Chat = (props: PropsList) => {
         database()
         .ref(`/rooms/${index}`)
         .update(newRoomData)
-        .then(() => {
-            fetch(
-                'https://fcm.googleapis.com/fcm/send',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'AAAAJDBaOnc:APA91bFUJBKT03Yt5ZNayYwqn4waoeteuXIpPL4JvtPrw3PwtwEELYnMyZgqt5RMMndSwkPnj7D9RO8FDm3PdE00EE7shaElvlhF5PfBbF8enmyW-hraXuqMqxLMcCfki_4ZQQ16qxlL',
-                    },
-                    body: JSON.stringify({
-                        notification: {
-                            body: inputText,
-                            title: sessionUser.username
-                        },
-                        to: token
-                    })
-                }
-            )
-            .catch(error => console.warn(error))
+        .then(async() => {
+            await sendNotification()
 
             setInputText('')
         })
@@ -160,6 +153,31 @@ const Chat = (props: PropsList) => {
             .on('value', (snapshot: any) => {
                 setRoom(snapshot.val() as RoomType)
             })
+    }
+
+    const sendNotification = () => {
+        fetch(
+            'https://fcm.googleapis.com/fcm/send',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'AAAAJDBaOnc:APA91bFUJBKT03Yt5ZNayYwqn4waoeteuXIpPL4JvtPrw3PwtwEELYnMyZgqt5RMMndSwkPnj7D9RO8FDm3PdE00EE7shaElvlhF5PfBbF8enmyW-hraXuqMqxLMcCfki_4ZQQ16qxlL',
+                },
+                body: JSON.stringify({
+                    notification: {
+                        body: inputText,
+                        title: sessionUser.username
+                    },
+                    to: token,
+                    data: {
+                        roomIndex,
+                        withUser: sessionUser.username
+                    }
+                })
+            }
+        )
+        .catch(error => console.warn(error))
     }
 
     return(
@@ -201,7 +219,7 @@ const Chat = (props: PropsList) => {
                     />
                 </Animated.View>
                 <TouchableOpacity
-                    onPress = {() => navigation.goBack()}
+                    onPress = {() => navigation.replace(route.params['fromScreen'])}
                     activeOpacity = {0.7}
                 >
                     <Image
