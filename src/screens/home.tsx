@@ -29,6 +29,8 @@ import SideMenu from 'react-native-side-menu-updated'
 import moment from 'moment'
 import {setNavigationProp} from '../references/navigationProp'
 
+let isLoggedOut = false
+
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Home'>
@@ -246,15 +248,16 @@ const Home = (props: PropsList) => {
         database()
         .ref('/rooms/')
         .on('value', (snapshot: any) => {
-            let roomsData = ((snapshot.val() || []) as RoomType[]).filter(room => room.participants.includes(recentSessionUser.username))
+            let roomsData = ((snapshot.val() || []) as RoomType[])
 
             setRooms(roomsData)
         })
         database()
-            .ref('/users/')
-            .on('value', async(snapshot: any) => {
+        .ref('/users/')
+        .on('value', async(snapshot: any) => {
+            if(!isLoggedOut) {
                 const usersData = snapshot.val() || []
-                
+            
                 for (let index = 0; index < usersData.length; index++) {
                     const currentIndexUserData = usersData[index];
 
@@ -267,7 +270,8 @@ const Home = (props: PropsList) => {
                         }
                     }
                 }
-            })
+            }
+        })
     }
     const textInputRef = useRef<TextInput>(null)
 
@@ -283,38 +287,46 @@ const Home = (props: PropsList) => {
         })
     }    
 
-    const logout = async() => {
+    const logout = () => {
         database()
             .ref('users')
             .once('value')
             .then(snapshot => {
+                let foundUserAtIndex = -1
+
                 const usersData = snapshot.val() || []
                 
                 for (let index = 0; index < usersData.length; index++) {
                     const currentIndexUserData = usersData[index];
 
-                    if (sessionUser.username === currentIndexUserData.username.toLowerCase() && sessionUser.password === currentIndexUserData.password) {                        
-                        database()
-                            .ref(`users/${index}`)
-                            .update({
-                                token: ''
-                            })
-                            .then(async() => {
-                                await AsyncStorage.removeItem('SessionUser')
-                                Animated.timing(modalOpacity, {
-                                    toValue: 0,
-                                    duration: 100,
-                                    useNativeDriver: true
-                                }).start(() => {
-                                    StatusBar.setHidden(false)
-                                    setModalVisible(false)
-                                    navigation.replace('Login')
-                                })
-                            })
+                    if (sessionUser.username === currentIndexUserData.username.toLowerCase() && sessionUser.password === currentIndexUserData.password) {    
+                        foundUserAtIndex = index                    
 
                         break
                     }
                 }
+
+                isLoggedOut = true
+                
+                database()
+                .ref(`users/${foundUserAtIndex}`)
+                .update({
+                    token: ''
+                })
+                .then(async() => {
+                    await AsyncStorage.removeItem('SessionUser')
+
+                    Animated.timing(modalOpacity, {
+                        toValue: 0,
+                        duration: 100,
+                        useNativeDriver: true
+                    }).start(() => {
+                        StatusBar.setHidden(false)
+                        setModalVisible(false)
+                        
+                        navigation.replace('Login')
+                    })
+                })
             })
     }
     const menu = <Menu 
@@ -440,71 +452,75 @@ const Home = (props: PropsList) => {
                 >
                     {
                         rooms.map((room, roomIndex) => {
-                            const interlocutors = room.participants[0] == sessionUser!.username ? room.participants[1] : room.participants[0]
+                            if(room.participants.includes(sessionUser!.username)) {
+                                const interlocutors = room.participants[0] == sessionUser!.username ? room.participants[1] : room.participants[0]
 
-                            return (
-                                <TouchableOpacity
-                                    key = {roomIndex}
-                                    activeOpacity = {0.6}
-                                    onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
-                                    style = {{
-                                        flexDirection: 'row',
-                                        padding: 10,
-                                        alignItems: 'center',
-                                        borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
-                                        borderBottomWidth: 1,
-                                    }}
-                                >
-                                    {/* <Image
-                                        source = {require('../images/user.png')}
+                                return (
+                                    <TouchableOpacity
+                                        key = {roomIndex}
+                                        activeOpacity = {0.6}
+                                        onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
                                         style = {{
-                                            width: 30,
-                                            height: 30
-                                        }}
-                                    /> */}
-                                    <View
-                                        style = {{
-                                            flex: 1,
-                                            justifyContent: 'space-between',
+                                            flexDirection: 'row',
+                                            padding: 10,
+                                            alignItems: 'center',
+                                            borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
+                                            borderBottomWidth: 1,
                                         }}
                                     >
-                                        <Text
-                                            numberOfLines = {1}
+                                        {/* <Image
+                                            source = {require('../images/user.png')}
                                             style = {{
-                                                fontFamily: OpenSans.SemiBold,
-                                                color: mode == '' ? '#222f3e' : 'white',
-                                                fontSize: 14,
+                                                width: 30,
+                                                height: 30
                                             }}
-                                        >
-                                            {interlocutors}
-                                        </Text>
-                                        <Text
-                                            numberOfLines = {1}
+                                        /> */}
+                                        <View
                                             style = {{
-                                                fontFamily: OpenSans.Regular,
-                                                color: mode == '' ? '#222f3e' : 'lightgrey',
-                                                fontSize: 12, 
-                                            }}
-                                        >
-                                            {room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text}
-                                        </Text>
-                                    </View>
-                                    <View>
-                                        <Text
-                                            numberOfLines = {1}
-                                            style = {{
-                                                fontFamily: OpenSans.Regular,
-                                                color: mode == '' ? 'grey' : 'lightgrey',
-                                                fontSize: 12,
                                                 flex: 1,
-                                                justifyContent: 'flex-end'
+                                                justifyContent: 'space-between',
                                             }}
                                         >
-                                            {moment(room.messages![room.messages!.length - 1].time).format('HH:mm')}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )
+                                            <Text
+                                                numberOfLines = {1}
+                                                style = {{
+                                                    fontFamily: OpenSans.SemiBold,
+                                                    color: mode == '' ? '#222f3e' : 'white',
+                                                    fontSize: 14,
+                                                }}
+                                            >
+                                                {interlocutors}
+                                            </Text>
+                                            <Text
+                                                numberOfLines = {1}
+                                                style = {{
+                                                    fontFamily: OpenSans.Regular,
+                                                    color: mode == '' ? '#222f3e' : 'lightgrey',
+                                                    fontSize: 12, 
+                                                }}
+                                            >
+                                                {room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text}
+                                            </Text>
+                                        </View>
+                                        <View>
+                                            <Text
+                                                numberOfLines = {1}
+                                                style = {{
+                                                    fontFamily: OpenSans.Regular,
+                                                    color: mode == '' ? 'grey' : 'lightgrey',
+                                                    fontSize: 12,
+                                                    flex: 1,
+                                                    justifyContent: 'flex-end'
+                                                }}
+                                            >
+                                                {moment(room.messages![room.messages!.length - 1].time).format('HH:mm')}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                )   
+                            } else {
+                                return null
+                            }
                         })
                     }
                 </ScrollView>
