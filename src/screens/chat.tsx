@@ -15,6 +15,7 @@ import { SessionUserType } from '../references/types/session-user'
 import { RoomType } from '../references/types/room'
 import AsyncStorage from '@react-native-community/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
+import moment from 'moment';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Chat'>
@@ -127,7 +128,7 @@ const Chat = (props: PropsList) => {
                         .ref(`/rooms/`)
                         .update(roomDataToSend)
                         .then(async() => {
-                            await sendNotification()
+                            sendNotification()
 
                             setInputText('')
                             getMessageAfterSubmit(newRoomData.length - 1)
@@ -154,7 +155,7 @@ const Chat = (props: PropsList) => {
         .ref(`/rooms/${index}`)
         .update(newRoomData)
         .then(async() => {
-            await sendNotification()
+            sendNotification()            
 
             setInputText('')
         })
@@ -169,13 +170,14 @@ const Chat = (props: PropsList) => {
     }
 
     const sendNotification = () => {
+        console.log(token)
         fetch(
             'https://fcm.googleapis.com/fcm/send',
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'AAAAJDBaOnc:APA91bFUJBKT03Yt5ZNayYwqn4waoeteuXIpPL4JvtPrw3PwtwEELYnMyZgqt5RMMndSwkPnj7D9RO8FDm3PdE00EE7shaElvlhF5PfBbF8enmyW-hraXuqMqxLMcCfki_4ZQQ16qxlL',
+                    'Authorization': 'key=AAAAJDBaOnc:APA91bFUJBKT03Yt5ZNayYwqn4waoeteuXIpPL4JvtPrw3PwtwEELYnMyZgqt5RMMndSwkPnj7D9RO8FDm3PdE00EE7shaElvlhF5PfBbF8enmyW-hraXuqMqxLMcCfki_4ZQQ16qxlL',
                 },
                 body: JSON.stringify({
                     notification: {
@@ -327,6 +329,15 @@ const Chat = (props: PropsList) => {
                                         >
                                             {message.text}
                                         </Text>
+                                        <Text
+                                            style = {{
+                                                color: mode == '' ? 'dimgrey' : 'lightgrey',
+                                                alignSelf: 'flex-end',
+                                                fontSize: 12
+                                            }}
+                                        >
+                                            {moment(message.time).format('HH:mm')}
+                                        </Text>
                                     </View>
                                     :
                                     <View
@@ -350,6 +361,15 @@ const Chat = (props: PropsList) => {
                                             }}
                                         >
                                             {message.text}
+                                        </Text>
+                                        <Text
+                                            style = {{
+                                                color: mode == '' ? 'grey' : 'lightgrey',
+                                                alignSelf: 'flex-end',
+                                                fontSize: 12,
+                                            }}
+                                        >
+                                            {moment(message.time).format('HH:mm')}
                                         </Text>
                                     </View>
                             }

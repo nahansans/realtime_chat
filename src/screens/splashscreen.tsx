@@ -24,21 +24,11 @@ const SplashScreen = (props: PropsList) => {
         checkTheme()
         setTimeout(async() => {
             const sessionUser = await AsyncStorage.getItem('SessionUser')
-            const sessionNotification = await AsyncStorage.getItem('notification')
-            console.log(sessionNotification)
+            
             if(sessionUser == null) {                
                 navigation.replace('Login')
             } else {
-                if (sessionNotification != null) {
-                    const sessionNotificationData = JSON.parse(sessionNotification) as notificationProps
-                    navigation.replace('Chat', {
-                        fromScreen: 'Home',
-                        roomIndex: sessionNotificationData.roomIndex,
-                        withUser: sessionNotificationData.withUser
-                    })
-                } else {
-                    navigation.replace('Home')
-                }
+                navigation.replace('Home')
             }
         }, 1000);
     }, [])

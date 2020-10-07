@@ -26,6 +26,8 @@ import { SessionUserType } from '../references/types/session-user'
 import { RoomType } from '../references/types/room'
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import SideMenu from 'react-native-side-menu-updated'
+import moment from 'moment'
+import {setNavigationProp} from '../references/navigationProp'
 
 
 type PropsList = {
@@ -178,9 +180,10 @@ const Home = (props: PropsList) => {
     const statusBarHeight = getStatusBarHeight()
 
     useEffect(() => {        
-        checkTheme()        
-        getSessionUserAndRooms()
+        checkTheme()
+        setNavigationProp(navigation)
         checkNotificationSession()
+        getSessionUserAndRooms()
         Animated.parallel([
             Animated.timing(circleView, {
                 toValue: 1,
@@ -449,7 +452,7 @@ const Home = (props: PropsList) => {
                                         padding: 10,
                                         alignItems: 'center',
                                         borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
-                                        borderBottomWidth: 1
+                                        borderBottomWidth: 1,
                                     }}
                                 >
                                     {/* <Image
@@ -459,10 +462,10 @@ const Home = (props: PropsList) => {
                                             height: 30
                                         }}
                                     /> */}
-                                    
                                     <View
                                         style = {{
-                                            paddingLeft: 10,
+                                            flex: 1,
+                                            justifyContent: 'space-between',
                                         }}
                                     >
                                         <Text
@@ -475,7 +478,6 @@ const Home = (props: PropsList) => {
                                         >
                                             {interlocutors}
                                         </Text>
-
                                         <Text
                                             numberOfLines = {1}
                                             style = {{
@@ -485,6 +487,20 @@ const Home = (props: PropsList) => {
                                             }}
                                         >
                                             {room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text}
+                                        </Text>
+                                    </View>
+                                    <View>
+                                        <Text
+                                            numberOfLines = {1}
+                                            style = {{
+                                                fontFamily: OpenSans.Regular,
+                                                color: mode == '' ? 'grey' : 'lightgrey',
+                                                fontSize: 12,
+                                                flex: 1,
+                                                justifyContent: 'flex-end'
+                                            }}
+                                        >
+                                            {moment(room.messages![room.messages!.length - 1].time).format('HH:mm')}
                                         </Text>
                                     </View>
                                 </TouchableOpacity>

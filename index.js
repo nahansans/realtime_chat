@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler'
 import PushNotification from 'react-native-push-notification'
 import AsyncStorage from '@react-native-community/async-storage';
+import {getNavigationProp} from './src/references/navigationProp'
 
 /**
  * @format
@@ -19,8 +20,17 @@ PushNotification.createChannel(
 
 PushNotification.configure(
     {
-        onNotification: async(notification) => {            
-            await AsyncStorage.setItem('notification', JSON.stringify(notification.data))
+        onNotification: async(notification) => {
+            navigationProp = getNavigationProp()
+            if (navigationProp != undefined) {
+                navigationProp.navigate('Chat', {
+                    fromScreen: 'Home',
+                    roomIndex: notification.data.roomIndex,
+                    withUser: notification.data.withUser
+                })
+            } else {
+                await AsyncStorage.setItem('notification', JSON.stringify(notification.data))
+            }
         }
     }
 )
