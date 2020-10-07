@@ -21,13 +21,20 @@ PushNotification.createChannel(
 PushNotification.configure(
     {
         onNotification: async(notification) => {
-            navigationProp = getNavigationProp()
+            const navigationProp = getNavigationProp()
+
             if (navigationProp != undefined) {
-                navigationProp.navigate('Chat', {
-                    fromScreen: 'Home',
-                    roomIndex: notification.data.roomIndex,
-                    withUser: notification.data.withUser
-                })
+                navigationProp.navigate('Home')
+
+                setTimeout(() => {
+                    const { roomIndex, withUser } = notification.data
+                    
+                    navigationProp.navigate('Chat', {
+                        fromScreen: 'Home',
+                        roomIndex,
+                        withUser
+                    })
+                }, 400)
             } else {
                 await AsyncStorage.setItem('notification', JSON.stringify(notification.data))
             }
