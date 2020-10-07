@@ -34,10 +34,10 @@ const Chat = (props: PropsList) => {
     const statusBarHeight = getStatusBarHeight()
     const [roomIndex, setRoomIndex] = useState(0)
     const [token, setToken] = useState('')
+    const scrollViewRef = useRef<ScrollView>(null)
+    const [contentOffset, setContentOffset] = useState()
 
-    useEffect(() => {
-        console.log(route.params['roomIndex'])
-        
+    useEffect(() => {        
         getSessionUserAndRooms()
         Animated.timing(scaleGradient, {
             toValue: 1,
@@ -46,8 +46,8 @@ const Chat = (props: PropsList) => {
             useNativeDriver: true
         }).start()
         checkSessionNotification()
+        scrollViewRef.current?.scrollToEnd()        
     }, [])
-
     async function checkSessionNotification() {
         const notificationData = await AsyncStorage.getItem('notification')
         if (notificationData != null) {
@@ -246,12 +246,16 @@ const Chat = (props: PropsList) => {
                 </Text>
             </View>
             <ScrollView
+                ref = {scrollViewRef}
                 contentContainerStyle = {{
                     justifyContent: 'flex-end',
                     flexGrow: 1
                 }}
                 style = {{
                     flex: 1
+                }}
+                onContentSizeChange = {() => {
+                    scrollViewRef.current?.scrollToEnd()
                 }}
             >
                 {
