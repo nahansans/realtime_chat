@@ -48,7 +48,6 @@ const Home = (props: PropsList) => {
     const [rooms, setRooms] = useState([] as RoomType[])
     
     const [modalVisible, setModalVisible] = useState(false)
-    const [modalCreateRoom, setModalCreateRoom] = useState(false)
     const [modalSearching, setModalSearching] = useState(false)
     const [users, setUsers] = useState([] as usersType[])
 
@@ -57,10 +56,12 @@ const Home = (props: PropsList) => {
     const scaleGradient = useRef(new Animated.Value(0)).current
     const modalOpacity = useRef(new Animated.Value(0)).current
     const circleView = useRef(new Animated.Value(0)).current
+    const [mode, setMode] = useState('')
 
     const statusBarHeight = getStatusBarHeight()
 
-    useEffect(() => {                
+    useEffect(() => {        
+        checkTheme()        
         getSessionUserAndRooms()
         checkNotificationSession()
         Animated.parallel([
@@ -69,12 +70,6 @@ const Home = (props: PropsList) => {
                 duration: 300,
                 delay: 200,
                 useNativeDriver: true,
-            }),
-            Animated.timing(scale, {
-                toValue: 1,
-                duration: 300,
-                delay: 200,
-                useNativeDriver: true
             }),
             Animated.timing(scaleSearch, {
                 toValue: 1,
@@ -90,6 +85,24 @@ const Home = (props: PropsList) => {
             })
         ]).start()
     }, [])
+    const checkTheme = async() => {
+        const themeMode = await AsyncStorage.getItem('mode')
+        console.log(themeMode)
+        if (themeMode != null) {
+            setMode('dark')
+        }
+    }
+    const changeTheme = async() => {
+        const themeMode = await AsyncStorage.getItem('mode')
+        if(themeMode == null) {
+            await AsyncStorage.setItem('mode', 'dark')
+            setMode('dark')
+        } else {
+            await AsyncStorage.removeItem('mode')
+            setMode('')
+        }
+
+    }
 
     async function checkNotificationSession() {
         const sessionNotification = await AsyncStorage.getItem('notification')
@@ -191,11 +204,12 @@ const Home = (props: PropsList) => {
         <SafeAreaView
             style = {{
                 flex: 1,
+                backgroundColor: mode == 'dark' ? '#1D1D1D' : '#f9f9f9'
             }}
         >
             <Animated.View
                 style = {{
-                    backgroundColor: 'white',
+                    backgroundColor: mode == '' ? 'white' : '#212121',
                     height,
                     width,
                     position: 'absolute',
@@ -205,7 +219,7 @@ const Home = (props: PropsList) => {
             />
             <View
                 style = {{
-                    backgroundColor: '#0abde3',
+                    backgroundColor: mode == '' ? '#0abde3' : '#1D1D1D',
                     paddingHorizontal: 20,
                     overflow: 'hidden',   
                     paddingBottom: 10,                    
@@ -221,13 +235,13 @@ const Home = (props: PropsList) => {
                     }}
                 >
                     <LinearGradient
-                        colors = {['#48dbfb', '#10ac84']}
+                        colors = {mode == '' ? ['#48dbfb', '#10ac84'] : ['#262626', '#262626']}
                         start = {{x: 0, y: 1}}
                         end = {{x: 1, y: 0}}
                         style = {{
                             position: 'absolute',
                             top: 0, left: 0, right: 0, bottom: 0,
-                            opacity: 0.8
+                            opacity: mode == '' ? 0.8 : 1
                         }}
                     />
                 </Animated.View>
@@ -259,6 +273,18 @@ const Home = (props: PropsList) => {
                         Skuy Chat
                     </Text>
                     <TouchableOpacity
+                        onPress = {changeTheme}
+                    >
+                        <Image
+                            source = {mode == '' ? require('../images/dark.png') : require('../images/light.png')}
+                            style = {{
+                                width: 22,
+                                height: 22,
+                                tintColor: 'white'
+                            }}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
                         onPress = {() => {
                             StatusBar.setHidden(true)
                             setModalVisible(true)
@@ -268,6 +294,9 @@ const Home = (props: PropsList) => {
                                 delay: 200,
                                 useNativeDriver: true
                             }).start()
+                        }}
+                        style = {{
+                            marginLeft: 10
                         }}
                     >
                         <Image
@@ -298,7 +327,7 @@ const Home = (props: PropsList) => {
                                     flexDirection: 'row',
                                     padding: 10,
                                     alignItems: 'center',
-                                    borderBottomColor: '#c8d6e5',
+                                    borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
                                     borderBottomWidth: 1
                                 }}
                             >
@@ -319,8 +348,8 @@ const Home = (props: PropsList) => {
                                         numberOfLines = {1}
                                         style = {{
                                             fontFamily: OpenSans.SemiBold,
-                                            color: '#222f3e',
-                                            fontSize: 14
+                                            color: mode == '' ? '#222f3e' : 'white',
+                                            fontSize: 14,
                                         }}
                                     >
                                         {interlocutors}
@@ -330,7 +359,7 @@ const Home = (props: PropsList) => {
                                         numberOfLines = {1}
                                         style = {{
                                             fontFamily: OpenSans.Regular,
-                                            color: '#222f3e',
+                                            color: mode == '' ? '#222f3e' : 'lightgrey',
                                             fontSize: 12, 
                                         }}
                                     >
@@ -346,8 +375,8 @@ const Home = (props: PropsList) => {
             <Animated.View
                 style = {{
                     position: 'absolute',
-                    bottom: 75, right: 20,
-                    backgroundColor: '#48dbfb',
+                    bottom: 20, right: 20,
+                    backgroundColor: mode == '' ? '#48dbfb' : '#2D2D2D',
                     borderRadius: 40,
                     padding: 10,
                     transform: [{scale: scaleSearch}]
@@ -380,49 +409,8 @@ const Home = (props: PropsList) => {
                     }}
                 >
                     <Image
-                        source = {require('../images/search.png')}
-                        style = {{ width: 18, height: 18, tintColor: 'white' }}
-                    />
-                </Pressable>
-            </Animated.View>
-            <Animated.View
-                style = {{
-                    position: 'absolute',
-                    bottom: 20, right: 20,
-                    backgroundColor: '#48dbfb',
-                    borderRadius: 40,
-                    padding: 10,
-                    transform: [{scale}]
-                }}
-            >
-                <Pressable
-                    onPress = {() => {
-                        StatusBar.setHidden(true)
-                        setModalCreateRoom(true)
-                        Animated.timing(modalOpacity, {
-                            toValue: 1,
-                            duration: 1000,
-                            useNativeDriver: true
-                        }).start()
-                    }}
-                    onPressIn = {() => {
-                        Animated.timing(scale, {
-                            toValue: 0.7,
-                            duration: 100,
-                            useNativeDriver: true
-                        }).start()
-                    }}
-                    onPressOut = {() => {
-                        Animated.timing(scale, {
-                            toValue: 1,
-                            duration: 100,
-                            useNativeDriver: true
-                        }).start()
-                    }}
-                >
-                    <Image
-                        source = {require('../images/ic_add_white.png')}
-                        style = {{ width: 30, height: 30 }}
+                        source = {require('../images/message.png')}
+                        style = {{ width: 20, height: 20, tintColor: 'white' }}
                     />
                 </Pressable>
             </Animated.View>
@@ -477,7 +465,7 @@ const Home = (props: PropsList) => {
                             width,
                             height: height * 0.3,
                             bottom: 0,
-                            backgroundColor: 'white',
+                            backgroundColor: mode == '' ? 'white' : '#262626',
                             borderTopEndRadius: 20,
                             borderTopStartRadius: 20,
                             padding: 20,
@@ -490,14 +478,16 @@ const Home = (props: PropsList) => {
                             style = {{
                                 fontFamily: OpenSans.SemiBoldItalic,
                                 fontSize: 20,
-                                letterSpacing: 0.5
+                                letterSpacing: 0.5,
+                                color: mode == '' ? 'black' : 'white'
                             }}
                         >
                             Anda Yakin Ingin Keluar ?
                         </Text>
                         <Text
                             style = {{
-                                fontFamily: OpenSans.Light
+                                fontFamily: OpenSans.Light,
+                                color: mode == '' ? 'black' : 'white'
                             }}
                         >
                             Klik Logout untuk keluar
@@ -515,8 +505,8 @@ const Home = (props: PropsList) => {
                                     })
                                 }}
                                 style = {{
-                                    backgroundColor: '#10ac84',
-                                    borderColor: '#10ac84',
+                                    backgroundColor: mode == '' ? '#10ac84' : '#128c6b',
+                                    borderColor: mode == '' ? '#10ac84' : '#128c6b',
                                     borderWidth: 1,
                                     borderRadius: 10,
                                     paddingHorizontal: 20,
@@ -531,7 +521,7 @@ const Home = (props: PropsList) => {
                             <TouchableOpacity
                                 onPress = {logout}
                                 style = {{
-                                    borderColor: '#ee5253',
+                                    borderColor: mode == '' ? '#ee5253' : '#f75656',
                                     borderWidth: 1,
                                     borderRadius: 10,
                                     paddingHorizontal: 20,
@@ -539,134 +529,8 @@ const Home = (props: PropsList) => {
                                     marginLeft: 5
                                 }}
                             >
-                                <Text style = {{ color: '#ee5253' }} >
+                                <Text style = {{ color: mode == '' ? '#ee5253' : '#f75656' }} >
                                     LOGOUT
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            <Modal
-                onRequestClose = {() => {
-                    Animated.timing(modalOpacity, {
-                        toValue: 0,
-                        duration: 100,
-                        useNativeDriver: true
-                    }).start(() => {
-                        StatusBar.setHidden(false)
-                        setModalCreateRoom(false)
-                    })
-                }}
-                visible = {modalCreateRoom}
-                transparent = {true}
-                animationType = 'slide'
-            >
-                <View
-                    style = {{
-                        flex: 1
-                    }}
-                >
-                    <Animated.View
-                        style = {{
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: 'rgba(0,0,0,0.5)',
-                            opacity: modalOpacity
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress = {() => {
-                                Animated.timing(modalOpacity, {
-                                    toValue: 0,
-                                    duration: 100,
-                                    useNativeDriver: true
-                                }).start(() => {
-                                    StatusBar.setHidden(false)
-                                    setModalCreateRoom(false)
-                                })
-                            }}
-                            style = {{
-                                width: '100%',
-                                height: '100%',
-                            }}
-                        />
-                    </Animated.View>
-                    
-                    <View
-                        style = {{
-                            position: 'absolute',
-                            width,
-                            height: height * 0.3,
-                            bottom: 0,
-                            backgroundColor: 'white',
-                            borderTopEndRadius: 20,
-                            borderTopStartRadius: 20,
-                            padding: 20,
-                            flex:1,
-                            justifyContent: 'center'
-                        }}
-                    >
-                        <Text
-                            style = {{
-                                fontFamily: OpenSans.Regular,
-                                textAlign: 'center'
-                            }}
-                        >
-                            Buat Room Chat
-                        </Text>
-                        <TextInput
-                            style = {{
-                                borderColor: '#222f3e',
-                                borderWidth: 1,
-                                paddingHorizontal: 10,
-                                marginVertical: 5,
-                                borderRadius: 10,
-                                fontFamily: OpenSans.Regular
-                            }}
-                        />
-                        <View style = {{flexDirection: 'row', marginTop: 10, alignSelf: 'center'}} >
-                            <TouchableOpacity
-                                onPress = {() => {
-                                    Animated.timing(modalOpacity, {
-                                        toValue: 0,
-                                        duration: 100,
-                                        useNativeDriver: true
-                                    }).start(() => {
-                                        StatusBar.setHidden(false)
-                                        setModalCreateRoom(false)
-                                    })
-                                }}
-                                style = {{
-                                    borderColor: '#ee5253',
-                                    borderWidth: 1,
-                                    borderRadius: 10,
-                                    paddingHorizontal: 20,
-                                    paddingVertical: 10,
-                                    marginRight: 5
-                                }}
-                            >
-                                <Text style = {{ color: '#ee5253', textAlign: 'center' }} >
-                                    BATAL
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress = {() => {
-                                    StatusBar.setHidden(false)
-                                    setModalCreateRoom(false)
-                                }}
-                                style = {{
-                                    backgroundColor: '#10ac84',
-                                    borderColor: '#10ac84',
-                                    borderWidth: 1,
-                                    borderRadius: 10,
-                                    paddingHorizontal: 20,
-                                    paddingVertical: 10,
-                                    marginLeft: 5,
-                                }}
-                            >
-                                <Text style = {{ color: 'white', textAlign: 'center' }} >
-                                    BUAT
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -725,7 +589,7 @@ const Home = (props: PropsList) => {
                             width,
                             height: height * 0.5,
                             bottom: 0,
-                            backgroundColor: 'white',
+                            backgroundColor: mode == '' ? 'white' : '#262626',
                             borderTopEndRadius: 20,
                             borderTopStartRadius: 20,
                             padding: 20,
@@ -735,7 +599,8 @@ const Home = (props: PropsList) => {
                         <Text
                             style = {{
                                 fontFamily: OpenSans.Regular,
-                                textAlign: 'center'
+                                textAlign: 'center',
+                                color: mode == '' ? 'black' : 'white'
                             }}
                         >
                             Searching User
@@ -746,15 +611,17 @@ const Home = (props: PropsList) => {
                                 autoCapitalize = 'none'
                                 // returnKeyType = {'search'}
                                 placeholder = 'searching user...'
+                                placeholderTextColor = {mode == '' ? '#242424' : 'white'}
                                 style = {{
-                                    borderColor: '#222f3e',
+                                    borderColor: mode == '' ? '#222f3e' : 'lightgrey',
                                     borderWidth: 1,
                                     paddingHorizontal: 10,
                                     marginVertical: 5,
                                     borderRadius: 10,
                                     fontFamily: OpenSans.Regular,
                                     flex: 1,
-                                    marginRight: 10
+                                    marginRight: 10,
+                                    color: mode == '' ? 'black' : 'white'
                                 }}
                                 onChangeText = {(value) => {
                                     search(value)
@@ -794,7 +661,7 @@ const Home = (props: PropsList) => {
                                                     flexDirection: 'row',
                                                     padding: 10,
                                                     alignItems: 'center',
-                                                    borderBottomColor: '#c8d6e5',
+                                                    borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
                                                     borderBottomWidth: 1
                                                 }}
                                             >
@@ -808,8 +675,8 @@ const Home = (props: PropsList) => {
                                                         numberOfLines = {1}
                                                         style = {{
                                                             fontFamily: OpenSans.SemiBold,
-                                                            color: '#222f3e',
-                                                            fontSize: 14
+                                                            fontSize: 14,
+                                                            color: mode == '' ? '#222f3e' : 'white'
                                                         }}
                                                     >
                                                         {item.username}

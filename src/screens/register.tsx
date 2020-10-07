@@ -29,13 +29,14 @@ const Register = (props: PropsList) => {
     const [scale, setScale] = useState(new Animated.Value(0))
     const [isLoading, setisLoading] = useState(false)
     const [usersData, setusersData] = useState<usersDataType[]>([])  
-    
+    const [mode, setMode] = useState('')
     const passwordRef = useRef<TextInput>(null)
 
     const circleView = useRef(new Animated.Value(0)).current
     
     useEffect(() => {
         StatusBar.setBarStyle('dark-content')
+        checkTheme()
         Animated.timing(circleView, {
             toValue: 1,
             duration: 300,
@@ -44,6 +45,14 @@ const Register = (props: PropsList) => {
         }).start()
         getUsersData()
     }, [])
+    const checkTheme = async() => {
+        const themeMode = await AsyncStorage.getItem('mode')
+        console.log(themeMode)
+        if (themeMode != null) {
+            setMode('dark')
+            StatusBar.setBarStyle('light-content')
+        }
+    }
 
     async function getUsersData() {        
         database()
@@ -106,9 +115,9 @@ const Register = (props: PropsList) => {
     return (
         <View style = {{ flex: 1 }} >
             <LinearGradient
-                colors = {['#FFF', '#48dbfb']}
+                colors = {mode == '' ? ['#FFF', '#48dbfb'] : ['#1D1D1D', '#1D1D1D']}
                 style = {{
-                    opacity: 0.2,
+                    opacity: mode == '' ? 0.2 : 1,
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0
                 }}
@@ -122,7 +131,7 @@ const Register = (props: PropsList) => {
                     position: 'absolute',
                     top: -50,
                     left: -130,
-                    backgroundColor: '#FFF',
+                    backgroundColor: mode == '' ? 'white' : '#212121',
                     transform: [{scaleY: circleView}]
                 }}
             />
@@ -151,7 +160,8 @@ const Register = (props: PropsList) => {
                             fontSize: 20,
                             fontFamily: OpenSans.SemiBold,
                             letterSpacing: 0.8,
-                            marginLeft: 10
+                            marginLeft: 10,
+                            color: mode == '' ? 'black' : 'white'
                         }}
                     >
                         Register
@@ -162,7 +172,8 @@ const Register = (props: PropsList) => {
                         marginTop: 20,
                         fontSize: 16,
                         fontFamily: OpenSans.Regular,
-                        letterSpacing: 0.2
+                        letterSpacing: 0.2,
+                        color: mode == '' ? 'black' : 'white'
                     }}
                 >
                     Username
@@ -174,15 +185,15 @@ const Register = (props: PropsList) => {
                     style = {{
                         borderRadius:50,
                         borderWidth: 1,
-                        borderColor: '#c8d6e5',
+                        borderColor: mode == '' ? '#c8d6e5' : 'white',
                         marginTop: 10,
                         paddingHorizontal: 20,
-                        backgroundColor: '#FFF',
+                        backgroundColor: mode == '' ? '#FFF' : '#2C2C2C',
                         fontFamily: OpenSans.Regular,
-                        color: '#222f3e'
+                        color: mode == '' ? '#222f3e' : 'white'
                     }}
                     placeholder = 'username'
-                    placeholderTextColor = '#c8d6e5'
+                    placeholderTextColor = {mode == '' ? '#c8d6e5' : 'lightgrey'}
                     onChangeText = {(value) => {
                         setUsername(value)
                     }}
@@ -193,7 +204,8 @@ const Register = (props: PropsList) => {
                         marginTop: 10,
                         fontSize: 16,
                         fontFamily: OpenSans.Regular,
-                        letterSpacing: 0.2
+                        letterSpacing: 0.2,
+                        color: mode == '' ? 'black' : 'white'
                     }}
                 >
                     Password
@@ -207,15 +219,15 @@ const Register = (props: PropsList) => {
                     style = {{
                         borderRadius:50,
                         borderWidth: 1,
-                        borderColor: '#c8d6e5',
+                        borderColor: mode == '' ? '#c8d6e5' : 'white',
                         marginTop: 10,
                         paddingHorizontal: 20,
-                        backgroundColor: '#FFF',
+                        backgroundColor: mode == '' ? '#FFF' : '#2C2C2C',
                         fontFamily: OpenSans.Regular,
-                        color: '#222f3e'
+                        color: mode == '' ? '#222f3e' : 'white'
                     }}
                     placeholder = 'password'
-                    placeholderTextColor = '#c8d6e5'
+                    placeholderTextColor = {mode == '' ? '#c8d6e5' : 'lightgrey'}
                     onChangeText = {(value) => {
                         setPassword(value)
                     }}
@@ -232,8 +244,8 @@ const Register = (props: PropsList) => {
                             fontSize: 10,
                             fontFamily: OpenSans.Regular,
                             letterSpacing: 0.2,
-                            color: '#222f3e',
-                            marginRight: 5
+                            marginRight: 5,
+                            color: mode == '' ? '#222f3e' : 'white'
                         }}
                     >
                         Sudah Punya Akun?
@@ -250,7 +262,7 @@ const Register = (props: PropsList) => {
                             fontSize: 12,
                             fontFamily: OpenSans.Regular,
                             letterSpacing: 0.2,
-                            color: '#341f97'
+                            color: mode == '' ? '#341f97' : '#856ff2'
                         }}
                         >
                             Login
@@ -290,7 +302,7 @@ const Register = (props: PropsList) => {
                         style = {{
                             padding: 10,
                             borderRadius: 20,
-                            backgroundColor: username == '' || password == '' ? 'grey' :'#0abde3',
+                            backgroundColor: username == '' || password == '' ? '#2C2C2C' :'#0abde3',
                             // width: 20,
                             // height: 20,
                         }}

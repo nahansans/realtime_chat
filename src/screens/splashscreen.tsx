@@ -18,8 +18,10 @@ type notificationProps = {
 const SplashScreen = (props: PropsList) => {
     const { OpenSans } = Fonts
     const { navigation } = props
+    const [mode, setMode] = useState('')
 
     useEffect(() => {        
+        checkTheme()
         setTimeout(async() => {
             const sessionUser = await AsyncStorage.getItem('SessionUser')
             const sessionNotification = await AsyncStorage.getItem('notification')
@@ -40,15 +42,23 @@ const SplashScreen = (props: PropsList) => {
             }
         }, 1000);
     }, [])
+    const checkTheme = async() => {
+        const themeMode = await AsyncStorage.getItem('mode')
+        console.log(themeMode)
+        if (themeMode != null) {
+            setMode('dark')
+            StatusBar.setBarStyle('light-content')
+        }
+    }
 
     return (
         <>
         <StatusBar barStyle='dark-content' />
         <View style = {{ flex: 1, alignItems: 'center', justifyContent: 'center'}} >
             <LinearGradient
-                colors = {['#FFF', '#48dbfb']}
+                colors = {mode == '' ? ['#FFF', '#48dbfb'] : ['#1D1D1D', '#1D1D1D']}
                 style = {{
-                    opacity: 0.2,
+                    opacity: mode == '' ? 0.2 : 1,
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0
                 }}

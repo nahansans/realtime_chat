@@ -14,7 +14,6 @@ import database from '@react-native-firebase/database';
 import { SessionUserType } from '../references/types/session-user'
 import { RoomType } from '../references/types/room'
 import AsyncStorage from '@react-native-community/async-storage';
-import { string } from 'yargs';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 type PropsList = {
@@ -36,18 +35,32 @@ const Chat = (props: PropsList) => {
     const [token, setToken] = useState('')
     const scrollViewRef = useRef<ScrollView>(null)
     const [contentOffset, setContentOffset] = useState()
+    const [mode, setMode] = useState('')
 
-    useEffect(() => {        
+    useEffect(() => {      
+        checkTheme()
         getSessionUserAndRooms()
-        Animated.timing(scaleGradient, {
-            toValue: 1,
-            duration: 300,
-            delay: 100,
-            useNativeDriver: true
-        }).start()
         checkSessionNotification()
-        scrollViewRef.current?.scrollToEnd()        
+        scrollViewRef.current?.scrollToEnd()  
     }, [])
+    const checkTheme = async() => {
+        const themeMode = await AsyncStorage.getItem('mode')
+        if (themeMode != null) {
+            setMode('dark')
+            Animated.timing(scaleGradient, {
+                toValue: 1,
+                useNativeDriver: true
+            }).start()
+        } else {
+            Animated.timing(scaleGradient, {
+                toValue: 1,
+                duration: 300,
+                delay: 100,
+                useNativeDriver: true
+            }).start()
+
+        }
+    }
     async function checkSessionNotification() {
         const notificationData = await AsyncStorage.getItem('notification')
         if (notificationData != null) {
@@ -186,11 +199,12 @@ const Chat = (props: PropsList) => {
         <SafeAreaView
             style = {{
                 flex: 1,
+                backgroundColor: mode == 'dark' ? '#1D1D1D' : '#f9f9f9'
             }}
         >
             <View
                 style = {{
-                    backgroundColor: '#0abde3',
+                    backgroundColor: mode == '' ? '#0abde3' : '#1D1D1D',
                     paddingHorizontal: 20,
                     overflow: 'hidden',   
                     paddingBottom: 20,
@@ -208,18 +222,18 @@ const Chat = (props: PropsList) => {
                     }}
                 >
                     <LinearGradient
-                        colors = {['#48dbfb', '#10ac84']}
+                        colors = {mode == '' ? ['#48dbfb', '#10ac84'] : ['#262626', '#262626']}
                         start = {{x: 0, y: 1}}
                         end = {{x: 1, y: 0}}
                         style = {{
                             position: 'absolute',
                             top: 0, left: 0, right: 0, bottom: 0,
-                            opacity: 0.8
+                            opacity: mode == '' ? 0.8 : 1
                         }}
                     />
                 </Animated.View>
                 <TouchableOpacity
-                    onPress = {() => navigation.replace(route.params['fromScreen'])}
+                    onPress = {() => navigation.navigate('Home')}
                     activeOpacity = {0.7}
                 >
                     <Image
@@ -252,7 +266,8 @@ const Chat = (props: PropsList) => {
                     flexGrow: 1
                 }}
                 style = {{
-                    flex: 1
+                    flex: 1,
+                    backgroundColor: mode == 'dark' ? '#1D1D1D' : '#f9f9f9'
                 }}
                 onContentSizeChange = {() => {
                     scrollViewRef.current?.scrollToEnd()
@@ -291,7 +306,7 @@ const Chat = (props: PropsList) => {
                                 message.sender == sessionUser.username ?
                                     <View
                                         style = {{
-                                            backgroundColor: '#0abde3',
+                                            backgroundColor: mode == '' ? '#0abde3' : '#146b7a',
                                             alignItems: 'flex-end',
                                             alignSelf: 'flex-end',
                                             flexWrap: 'wrap',
@@ -316,7 +331,7 @@ const Chat = (props: PropsList) => {
                                     :
                                     <View
                                         style = {{
-                                            backgroundColor: '#c8d6e5',
+                                            backgroundColor: mode == '' ? '#c8d6e5' : '#353535',
                                             alignItems: 'flex-start',
                                             alignSelf: 'flex-start',
                                             flexWrap: 'wrap',
@@ -325,13 +340,13 @@ const Chat = (props: PropsList) => {
                                             borderRadius: 10,
                                             marginLeft: 10,
                                             marginRight: 50,
-                                            marginTop: 10
+                                            marginTop: 10,
                                         }}
                                     >
                                         <Text
                                             style = {{
                                                 fontFamily: OpenSans.Regular,
-                                                color: 'black',
+                                                color: mode == '' ? 'black' : 'white'
                                             }}
                                         >
                                             {message.text}
@@ -346,8 +361,9 @@ const Chat = (props: PropsList) => {
             <View
                 style = {{
                     flexDirection: 'row',
-                    margin: 10,
+                    padding: 10,
                     alignItems: 'center',
+                    backgroundColor: mode == '' ? 'white' : '#262626'
                 }}
             >
                 <View
@@ -359,15 +375,17 @@ const Chat = (props: PropsList) => {
                 >
                     <TextInput
                         placeholder = 'Type a message'
+                        placeholderTextColor = 'grey'
                         onSubmitEditing = {() => submit()}
                         onChangeText = {(newValue: string) => setInputText(newValue)}
                         style = {{
                             borderWidth: 1,
-                            borderColor: '#c8d6e5',
+                            borderColor: mode == '' ? '#c8d6e5' : 'lightgrey',
                             justifyContent: 'space-between',
                             borderRadius: 40,
                             paddingHorizontal: 20,
-                            fontFamily: OpenSans.Regular
+                            fontFamily: OpenSans.Regular,
+                            color: mode == '' ? 'black' : 'white'
                         }}
                         value = {inputText}
                     />
@@ -377,7 +395,7 @@ const Chat = (props: PropsList) => {
                     onPress = {() => submit()}
                     style = {{
                         padding: 10,
-                        backgroundColor: '#0abde3',
+                        backgroundColor: mode == '' ? '#0abde3' : '#3a3a3a',
                         justifyContent: 'center',
                         borderRadius: 25,
                     }}
