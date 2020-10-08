@@ -10,8 +10,13 @@ import Chat from './src/screens/chat';
 import messaging from '@react-native-firebase/messaging'
 import PushNotification from 'react-native-push-notification'
 import AsyncStorage from '@react-native-community/async-storage';
+import { getOpenedRoomIndex } from './src/references/navigationProp';
 
 const Stack = createStackNavigator()
+
+type remoteMessageType = {
+  roomIndex: any
+}
 
 const App = () => {
   let unsubcribeForegroundListener= undefined
@@ -22,19 +27,24 @@ const App = () => {
         const token = await messaging().getToken()
 
         AsyncStorage.setItem('token', token)
+        const openedRoomIndex = getOpenedRoomIndex()        
 
         unsubcribeForegroundListener = messaging().onMessage(remoteMessage => {
-          PushNotification.localNotification({
-            title: remoteMessage.notification?.title,
-            message: remoteMessage.notification?.body!,
-            channelId: 'default',
-            playSound: true,
-            soundName: 'default',
-            importance: "high",
-            priority: 'high',
-            vibrate: true,
-            userInfo: remoteMessage.data
-          })
+          const { roomIndex } = remoteMessage.data as remoteMessageType
+          
+          if (openedRoomIndex !== roomIndex) {
+            PushNotification.localNotification({
+              title: remoteMessage.notification?.title,
+              message: remoteMessage.notification?.body!,
+              channelId: 'default',
+              playSound: true,
+              soundName: 'default',
+              importance: "high",
+              priority: 'high',
+              vibrate: true,
+              userInfo: remoteMessage.data
+            })
+          }
         })
     }
   }

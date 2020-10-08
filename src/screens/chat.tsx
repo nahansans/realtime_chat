@@ -16,6 +16,7 @@ import { RoomType } from '../references/types/room'
 import AsyncStorage from '@react-native-community/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import moment from 'moment';
+import { getOpenedRoomIndex, setOpenedRoomIndex } from './../references/navigationProp';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'Chat'>
@@ -41,8 +42,12 @@ const Chat = (props: PropsList) => {
     useEffect(() => {      
         checkTheme()
         getSessionUserAndRooms()
+        setOpenedRoomIndex(route.params['roomIndex'] == undefined ? roomIndex : route.params['roomIndex'])
         checkSessionNotification()
-        scrollViewRef.current?.scrollToEnd()  
+        scrollViewRef.current?.scrollToEnd()        
+        return() => {
+            setOpenedRoomIndex(undefined)
+        }
     }, [])
     const checkTheme = async() => {
         const themeMode = await AsyncStorage.getItem('mode')
@@ -123,7 +128,7 @@ const Chat = (props: PropsList) => {
                         roomDataToSend[roomDataIndex.toString()] = newRoomData[roomDataIndex]                    
                     }
                     setRoomIndex(newRoomData.length - 1)
-                    console.log(newRoomData.length)
+                    
                     database()
                         .ref(`/rooms/`)
                         .update(roomDataToSend)
@@ -170,7 +175,7 @@ const Chat = (props: PropsList) => {
     }
 
     const sendNotification = () => {
-        console.log(token)
+        
         fetch(
             'https://fcm.googleapis.com/fcm/send',
             {

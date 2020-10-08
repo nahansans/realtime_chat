@@ -209,7 +209,7 @@ const Home = (props: PropsList) => {
     }, [])
     const checkTheme = async() => {
         const themeMode = await AsyncStorage.getItem('mode')
-        console.log(themeMode)
+        
         if (themeMode != null) {
             setMode('dark')
         }
@@ -228,7 +228,7 @@ const Home = (props: PropsList) => {
 
     async function checkNotificationSession() {
         const sessionNotification = await AsyncStorage.getItem('notification')
-        console.log(sessionNotification)
+        
         if (sessionNotification != null) {
             const sessionNotificationData = JSON.parse(sessionNotification) as notificationProps
             navigation.navigate('Chat', {
