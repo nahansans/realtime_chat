@@ -42,12 +42,14 @@ type usersType = {
 }
 type notificationProps = {
     roomIndex: any,
-    withUser: any
+    withUser: any,
+    withGroup: any
 }
 
 type PropsMenu = {
     changeTheme: () => void,
     logoutModal: () => void,
+    newGroupNavigation: () => void,
     backgroundColor: string,
     color: string,
     username: string,
@@ -55,13 +57,13 @@ type PropsMenu = {
     usernameColor: string,
     modeIcon: any,
     linearGradientColors: any,
-    linearGradientOpacity: any
+    linearGradientOpacity: any,
 }
 
 class Menu extends React.Component<PropsMenu, {}> {
     
     render() {
-        const { logoutModal, color, backgroundColor, backgroundColorUsername, username, usernameColor, changeTheme, modeIcon, linearGradientColors, linearGradientOpacity } = this.props
+        const { logoutModal, color, backgroundColor, backgroundColorUsername, username, usernameColor, changeTheme, modeIcon, linearGradientColors, linearGradientOpacity, newGroupNavigation } = this.props
         return (
             <View
                 style = {{
@@ -99,7 +101,34 @@ class Menu extends React.Component<PropsMenu, {}> {
                     </Text>
                 </View>
                 <View style = {{ flex: 1, padding: 20 }} >
-                <TouchableOpacity
+                    <TouchableOpacity
+                        onPress = {() => {
+                            newGroupNavigation()
+                        }}
+                        style = {{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: 20
+                        }}
+                    >
+                        <Image
+                            source = {require('../images/users.png')}
+                            style = {{
+                                width: 24,
+                                height: 24,
+                                tintColor: color,
+                                marginRight: 20
+                            }}
+                        />
+                        <Text
+                            style = {{
+                                color
+                            }}
+                        >
+                            New Group
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                         onPress = {() => {
                             changeTheme()
                         }}
@@ -184,8 +213,8 @@ const Home = (props: PropsList) => {
     useEffect(() => {        
         checkTheme()
         setNavigationProp(navigation)
-        checkNotificationSession()
         getSessionUserAndRooms()
+        checkNotificationSession()
         Animated.parallel([
             Animated.timing(circleView, {
                 toValue: 1,
@@ -230,11 +259,12 @@ const Home = (props: PropsList) => {
         const sessionNotification = await AsyncStorage.getItem('notification')
         
         if (sessionNotification != null) {
-            const sessionNotificationData = JSON.parse(sessionNotification) as notificationProps
+            const sessionNotificationData = JSON.parse(sessionNotification) as notificationProps            
             navigation.navigate('Chat', {
                 fromScreen: 'Home',
                 roomIndex: sessionNotificationData.roomIndex,
-                withUser: sessionNotificationData.withUser
+                withUser: sessionNotificationData.withUser == null ? undefined : sessionNotificationData.withUser,                
+                withGroup: sessionNotificationData.withGroup
             })
         }
     }
@@ -339,7 +369,8 @@ const Home = (props: PropsList) => {
                             delay: 200,
                             useNativeDriver: true
                         }).start()
-                    }} 
+                    }}
+                    newGroupNavigation = {() => navigation.navigate('NewGroup')}
                     backgroundColor = {mode == 'dark' ? '#1D1D1D' : '#f9f9f9'}
                     color = {mode == 'dark' ? 'white' : 'black'}
                     usernameColor = 'white'
@@ -367,6 +398,7 @@ const Home = (props: PropsList) => {
                 friction: 20,
                 useNativeDriver: true
             })}
+            
         >
             <SafeAreaView
                 style = {{
@@ -459,7 +491,12 @@ const Home = (props: PropsList) => {
                                     <TouchableOpacity
                                         key = {roomIndex}
                                         activeOpacity = {0.6}
-                                        onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
+                                        onPress = {() => navigation.navigate('Chat', {
+                                            fromScreen:'Home', 
+                                            roomIndex, 
+                                            withUser: room.groupName == undefined ? interlocutors : undefined,
+                                            withGroup: room.groupName != undefined ? room.groupName : undefined
+                                        })}
                                         style = {{
                                             flexDirection: 'row',
                                             padding: 10,
@@ -489,7 +526,7 @@ const Home = (props: PropsList) => {
                                                     fontSize: 14,
                                                 }}
                                             >
-                                                {interlocutors}
+                                                {room.groupName == undefined ? interlocutors : room.groupName}
                                             </Text>
                                             <Text
                                                 numberOfLines = {1}
@@ -499,7 +536,7 @@ const Home = (props: PropsList) => {
                                                     fontSize: 12, 
                                                 }}
                                             >
-                                                {room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text}
+                                                {room.messages![room.messages!.length - 1].sender != 'Sistem' ? room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text : room.messages![room.messages!.length - 1].text}
                                             </Text>
                                         </View>
                                         <View>

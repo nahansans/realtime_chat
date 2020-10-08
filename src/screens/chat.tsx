@@ -36,7 +36,7 @@ const Chat = (props: PropsList) => {
     const [roomIndex, setRoomIndex] = useState(0)
     const [token, setToken] = useState('')
     const scrollViewRef = useRef<ScrollView>(null)
-    const [contentOffset, setContentOffset] = useState()
+    const [getUsersData, setgetUsersData] = useState([] as SessionUserType[])
     const [mode, setMode] = useState('')
 
     useEffect(() => {      
@@ -91,22 +91,25 @@ const Chat = (props: PropsList) => {
             })
         }
 
+        
         database()
-            .ref('/users/')
-            .once('value')
-            .then(snapshot => {
-                const usersData = snapshot.val() || []
-                
+        .ref('/users/')
+        .once('value')
+        .then(snapshot => {
+            const usersData = snapshot.val() || []
+            setgetUsersData(usersData)
+            if (route.params['withUser'] != undefined) {
                 for (let index = 0; index < usersData.length; index++) {
                     const currentIndexUserData = usersData[index];
-
                     if (currentIndexUserData.username == route.params['withUser']) {
                         setToken(currentIndexUserData.token)
 
                         break
-                    }
+                    }                
                 }
-            })
+            }
+        })
+        
         
     }
 
@@ -133,7 +136,7 @@ const Chat = (props: PropsList) => {
                         .ref(`/rooms/`)
                         .update(roomDataToSend)
                         .then(async() => {
-                            sendNotification()
+                            sendNotification(token)
 
                             setInputText('')
                             getMessageAfterSubmit(newRoomData.length - 1)
@@ -160,7 +163,23 @@ const Chat = (props: PropsList) => {
         .ref(`/rooms/${index}`)
         .update(newRoomData)
         .then(async() => {
-            sendNotification()            
+            if (route.params['withUser'] != undefined) {
+                sendNotification(token)
+            } else {
+                for (let index = 0; index < room.participants.length; index++) {
+                    const element = room.participants[index];
+                    console.log(element)
+                    for (let i = 0; i < getUsersData.length; i++) {
+                        const user = getUsersData[i];
+                        if (element == user.username) {
+                            if (user.username != sessionUser.username) {
+                                sendNotification(user.token)
+                                console.log(user.token)
+                            }
+                        }
+                    }
+                }
+            }
 
             setInputText('')
         })
@@ -174,7 +193,7 @@ const Chat = (props: PropsList) => {
             })
     }
 
-    const sendNotification = () => {
+    const sendNotification = (value: string) => {
         
         fetch(
             'https://fcm.googleapis.com/fcm/send',
@@ -189,15 +208,16 @@ const Chat = (props: PropsList) => {
                         body: inputText,
                         title: sessionUser.username
                     },
-                    to: token,
+                    to: value,
                     data: {
                         roomIndex,
-                        withUser: sessionUser.username
+                        withUser: route.params['withGroup'] != undefined ? undefined : sessionUser.username,
+                        withGroup: route.params['withGroup'] != undefined ? route.params['withGroup'] : undefined
                     }
                 })
             }
         )
-        .catch(error => console.warn(error))
+        .catch(error => console.warn(error))        
     }
 
     return(
@@ -251,20 +271,39 @@ const Chat = (props: PropsList) => {
                         }}
                     />
                 </TouchableOpacity>
-                <Text
-                    numberOfLines = {1}
-                    style = {{
-                        fontFamily: OpenSans.SemiBold,
-                        letterSpacing: 1,
-                        color: '#FFF',
-                        fontSize: 16,
-                        flex: 1,
-                        flexWrap: 'wrap',
-                        paddingLeft: 10
+                <TouchableOpacity 
+                    activeOpacity = {1} 
+                    style = {{ paddingLeft: 10}} 
+                    onPress = {() => {
+                        
                     }}
                 >
-                    {route.params.withUser}
-                </Text>
+                    <Text
+                        numberOfLines = {1}
+                        style = {{
+                            fontFamily: OpenSans.SemiBold,
+                            letterSpacing: 1,
+                            color: '#FFF',
+                            fontSize: 16,
+                            flexWrap: 'wrap',
+                        }}
+                    >
+                        {route.params.withGroup == undefined ? route.params['withUser'] : route.params['withGroup']}
+                    </Text>
+                    {
+                        route.params.withUser == undefined ?
+                            <Text
+                                style = {{
+                                    fontFamily: OpenSans.SemiBold,
+                                    color: '#FFF',
+                                    fontSize: 12,
+                                }}
+                            >
+                                {`${room.participants} `}
+                            </Text>
+                        : null
+                    }
+                </TouchableOpacity>
             </View>
             <ScrollView
                 ref = {scrollViewRef}
@@ -349,16 +388,28 @@ const Chat = (props: PropsList) => {
                                         style = {{
                                             backgroundColor: mode == '' ? '#c8d6e5' : '#353535',
                                             alignItems: 'flex-start',
-                                            alignSelf: 'flex-start',
+                                            alignSelf: message.sender != 'Sistem' ? 'flex-start' : 'center',
                                             flexWrap: 'wrap',
                                             paddingVertical: 10,
                                             paddingHorizontal: 10,
                                             borderRadius: 10,
-                                            marginLeft: 10,
-                                            marginRight: 50,
+                                            marginLeft:  message.sender != 'Sistem' ? 10 : 0,
+                                            marginRight:  message.sender != 'Sistem' ? 50 : 0,
                                             marginTop: 10,
                                         }}
                                     >
+                                        {
+                                            message.sender != 'Sistem' ?
+                                            <Text
+                                                style = {{
+                                                    fontFamily: OpenSans.Regular,
+                                                    color: mode == '' ? 'black' : 'white'
+                                                }}
+                                            >
+                                                {message.sender}
+                                            </Text>
+                                            : null
+                                        }
                                         <Text
                                             style = {{
                                                 fontFamily: OpenSans.Regular,
@@ -367,15 +418,19 @@ const Chat = (props: PropsList) => {
                                         >
                                             {message.text}
                                         </Text>
-                                        <Text
-                                            style = {{
-                                                color: mode == '' ? 'grey' : 'lightgrey',
-                                                alignSelf: 'flex-end',
-                                                fontSize: 12,
-                                            }}
-                                        >
-                                            {moment(message.time).format('HH:mm')}
-                                        </Text>
+                                        {
+                                            message.sender != 'Sistem' ?
+                                            <Text
+                                                style = {{
+                                                    color: mode == '' ? 'grey' : 'lightgrey',
+                                                    alignSelf: 'flex-end',
+                                                    fontSize: 12,
+                                                }}
+                                            >
+                                                {moment(message.time).format('HH:mm')}
+                                            </Text>
+                                            : null
+                                        }
                                     </View>
                             }
                             </>

@@ -7,6 +7,9 @@ import Login from './src/screens/login';
 import Home from './src/screens/home';
 import Register from './src/screens/register';
 import Chat from './src/screens/chat';
+import NewGroup from './src/screens/new-group';
+import EnterName from './src/screens/new-group/enter-name'
+
 import messaging from '@react-native-firebase/messaging'
 import PushNotification from 'react-native-push-notification'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -32,7 +35,7 @@ const App = () => {
           const openedRoomIndex = getOpenedRoomIndex()
           const { roomIndex } = remoteMessage.data as remoteMessageType
           
-          if (openedRoomIndex !== roomIndex) {
+          if (openedRoomIndex != roomIndex) {
             PushNotification.localNotification({
               title: remoteMessage.notification?.title,
               message: remoteMessage.notification?.body!,
@@ -42,7 +45,9 @@ const App = () => {
               importance: "high",
               priority: 'high',
               vibrate: true,
-              userInfo: remoteMessage.data
+              userInfo: remoteMessage.data,
+              group: "group",
+              groupSummary: true
             })
           }
         })
@@ -82,6 +87,14 @@ const App = () => {
           <Stack.Screen
             name = 'Chat'
             component = {Chat}
+          />
+          <Stack.Screen
+            name = 'NewGroup'
+            component = {NewGroup}
+          />
+          <Stack.Screen
+            name = 'EnterName'
+            component = {EnterName}
           />
         </Stack.Navigator>
       </NavigationContainer>

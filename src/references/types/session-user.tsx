@@ -1,4 +1,5 @@
 export type SessionUserType = {
     username: string,
-    password: string
+    password: string,
+    token?: any
 }

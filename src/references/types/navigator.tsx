@@ -11,6 +11,11 @@ export type StackParamsList = {
     Chat: {
         fromScreen: FromScreen,
         roomIndex?: number,
-        withUser: string
+        withUser?: any,
+        withGroup?: any
+    },
+    NewGroup: undefined,
+    EnterName: {
+        data: any
     }
 }

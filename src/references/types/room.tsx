@@ -6,5 +6,7 @@ type MessageType = {
 
 export type RoomType = {
     messages?: MessageType[],
-    participants: string[]
+    participants: string[],
+    groupName?: string,
+    created_by?: string
 }
