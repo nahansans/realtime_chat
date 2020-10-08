@@ -27,9 +27,9 @@ const App = () => {
         const token = await messaging().getToken()
 
         AsyncStorage.setItem('token', token)
-        const openedRoomIndex = getOpenedRoomIndex()        
 
         unsubcribeForegroundListener = messaging().onMessage(remoteMessage => {
+          const openedRoomIndex = getOpenedRoomIndex()
           const { roomIndex } = remoteMessage.data as remoteMessageType
           
           if (openedRoomIndex !== roomIndex) {
