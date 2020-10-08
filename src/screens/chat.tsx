@@ -75,14 +75,17 @@ const Chat = (props: PropsList) => {
     }
 
     async function getSessionUserAndRooms() {
-        const sessionUser = await AsyncStorage.getItem('SessionUser')
+        const recentUser = await AsyncStorage.getItem('SessionUser')
+        const sessionUser = JSON.parse(recentUser!) as SessionUserType
 
-        setSessionUser(JSON.parse(sessionUser!) as SessionUserType)
+        setSessionUser(JSON.parse(recentUser!) as SessionUserType)
 
         if (route.params['roomIndex'] != undefined) {
             database()
                 .ref(`/rooms/${route.params.roomIndex}`)
-                .on('value', (snapshot: any) => setRoom(snapshot.val() as RoomType))
+                .on('value', (snapshot: any) => {
+                    setRoom(snapshot.val() as RoomType)
+                })
         } else {
             database()
             .ref('rooms')
@@ -153,7 +156,6 @@ const Chat = (props: PropsList) => {
 
     const submitMessage = (index: any) => {
         const newRoomData = JSON.parse(JSON.stringify(room)) as RoomType
-        
         newRoomData.messages?.push({
             sender: sessionUser.username,
             time: (new Date()).getTime(),
@@ -399,15 +401,21 @@ const Chat = (props: PropsList) => {
                                         }}
                                     >
                                         {
-                                            message.sender != 'Sistem' ?
-                                            <Text
-                                                style = {{
-                                                    fontFamily: OpenSans.Regular,
-                                                    color: mode == '' ? 'black' : 'white'
-                                                }}
-                                            >
-                                                {message.sender}
-                                            </Text>
+                                            route.params.withGroup != undefined ?
+                                            <>
+                                            {
+                                                message.sender != 'Sistem' ?
+                                                <Text
+                                                    style = {{
+                                                        fontFamily: OpenSans.Regular,
+                                                        color: mode == '' ? 'black' : 'white'
+                                                    }}
+                                                >
+                                                    {message.sender}
+                                                </Text>
+                                                : null
+                                            }
+                                            </>
                                             : null
                                         }
                                         <Text
