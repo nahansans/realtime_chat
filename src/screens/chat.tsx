@@ -207,8 +207,8 @@ const Chat = (props: PropsList) => {
                 },
                 body: JSON.stringify({
                     notification: {
-                        body: inputText,
-                        title: sessionUser.username
+                        body: route.params['withUser'] != undefined ? inputText : `${sessionUser.username}: ${inputText}`,
+                        title: route.params['withUser'] != undefined ? sessionUser.username : route.params['withGroup']
                     },
                     to: value,
                     data: {

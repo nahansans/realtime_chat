@@ -43,7 +43,7 @@ type usersType = {
 type notificationProps = {
     roomIndex: any,
     withUser: any,
-    withGroup: any
+    withGroup: string
 }
 
 type PropsMenu = {
@@ -263,8 +263,8 @@ const Home = (props: PropsList) => {
             navigation.navigate('Chat', {
                 fromScreen: 'Home',
                 roomIndex: sessionNotificationData.roomIndex,
-                withUser: sessionNotificationData.withUser == null ? undefined : sessionNotificationData.withUser,                
-                withGroup: sessionNotificationData.withGroup
+                withUser: sessionNotificationData.withUser == undefined ? undefined : sessionNotificationData.withUser,                
+                withGroup: sessionNotificationData.withGroup != undefined ?  sessionNotificationData.withGroup : undefined
             })
         }
     }
