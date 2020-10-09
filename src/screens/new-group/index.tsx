@@ -96,7 +96,7 @@ const NewGroup = (props: PropsList) => {
         }
     }
     const submit = () => {
-        if (textValue != '') {
+        if (textValue != '' && participant.length > 0) {
             const newRoomData = createRoom == null ? [] as RoomType[] : JSON.parse(JSON.stringify(createRoom)) as RoomType[]
             const newParticipant = JSON.parse(JSON.stringify(participant))
             newParticipant.unshift(sessionUser)
@@ -117,7 +117,8 @@ const NewGroup = (props: PropsList) => {
                     time: (new Date()).getTime(),
                     text: `${sessionUser.username} telah membuat grub`
                 }],
-                created_by: sessionUser.username
+                created_by: sessionUser.username,
+                deleted_participants: []
             })
             let roomDataToSend = {} as any
             let roomIndex = 0

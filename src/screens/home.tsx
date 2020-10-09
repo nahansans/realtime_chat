@@ -875,8 +875,10 @@ const Home = (props: PropsList) => {
                                                         let selectedRoomIndex = -1
 
                                                         for(let roomIndex = 0; roomIndex < rooms.length; roomIndex++) {
-                                                            if(rooms[roomIndex].participants.includes(sessionUser.username) && rooms[roomIndex].participants.includes(item.username)) {
-                                                                selectedRoomIndex = roomIndex
+                                                            if (rooms[roomIndex].groupName == undefined) {
+                                                                if(rooms[roomIndex].participants.includes(sessionUser.username) && rooms[roomIndex].participants.includes(item.username)) {
+                                                                    selectedRoomIndex = roomIndex
+                                                                }
                                                             }
                                                         }
                                                         StatusBar.setHidden(false)

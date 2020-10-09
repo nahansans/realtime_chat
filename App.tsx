@@ -8,6 +8,7 @@ import Home from './src/screens/home';
 import Register from './src/screens/register';
 import Chat from './src/screens/chat';
 import NewGroup from './src/screens/new-group';
+import DetailGroup from './src/screens/detail-group';
 
 import messaging from '@react-native-firebase/messaging'
 import PushNotification from 'react-native-push-notification'
@@ -90,6 +91,10 @@ const App = () => {
           <Stack.Screen
             name = 'NewGroup'
             component = {NewGroup}
+          />
+          <Stack.Screen
+            name = 'DetailGroup'
+            component = {DetailGroup}
           />
         </Stack.Navigator>
       </NavigationContainer>

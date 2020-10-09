@@ -38,6 +38,9 @@ const Chat = (props: PropsList) => {
     const scrollViewRef = useRef<ScrollView>(null)
     const [getUsersData, setgetUsersData] = useState([] as SessionUserType[])
     const [mode, setMode] = useState('')
+    const [participants, setParticipants] = useState([] as string[])
+    const [isDeleted, setIsDeleted] = useState(false)
+    const [Dikeluarkan, setDikeluarkan] = useState(false)
 
     useEffect(() => {      
         checkTheme()
@@ -85,6 +88,25 @@ const Chat = (props: PropsList) => {
                 .ref(`/rooms/${route.params.roomIndex}`)
                 .on('value', (snapshot: any) => {
                     setRoom(snapshot.val() as RoomType)
+                    if (route.params.withGroup != null) {
+                        let newParticipants = snapshot.val().participants
+                        let filteredParticipants = [] as string[]
+                        if (snapshot.val().deleted_participants != undefined) {
+                            for (let index = 0; index < snapshot.val().deleted_participants.length; index++) {
+                                const element = snapshot.val().deleted_participants[index];
+                                if (element.username == sessionUser.username) {
+                                    setIsDeleted(true)
+                                    if (element.status == 'dikeluarkan') {
+                                        setDikeluarkan(true)
+                                    }
+                                }
+                                filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username && participant != element.username)
+                            }
+                        } else {
+                            filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username)
+                        }
+                        setParticipants(filteredParticipants)
+                    }
                 })
         } else {
             database()
@@ -274,10 +296,12 @@ const Chat = (props: PropsList) => {
                     />
                 </TouchableOpacity>
                 <TouchableOpacity 
-                    activeOpacity = {1} 
+                    activeOpacity = {route.params['withGroup'] != undefined ? 0.6 : 1}
                     style = {{ paddingLeft: 10}} 
                     onPress = {() => {
-                        
+                        if (route.params.withGroup != undefined) {
+                            navigation.navigate('DetailGroup', {roomIndex: route.params['roomIndex'], isDeleted})
+                        }
                     }}
                 >
                     <Text
@@ -301,7 +325,7 @@ const Chat = (props: PropsList) => {
                                     fontSize: 12,
                                 }}
                             >
-                                {room.participants != undefined ? `${room.participants} ` : null}
+                                {participants.length} Members
                             </Text>
                         : null
                     }
@@ -455,49 +479,69 @@ const Chat = (props: PropsList) => {
                     backgroundColor: mode == '' ? 'white' : '#262626'
                 }}
             >
-                <View
-                    style = {{
-                        flex:1,
-                        justifyContent: 'space-between',
-                        paddingRight: 10
-                    }}
-                >
-                    <TextInput
-                        placeholder = 'Type a message'
-                        placeholderTextColor = 'grey'
-                        onSubmitEditing = {() => submit()}
-                        onChangeText = {(newValue: string) => setInputText(newValue)}
+                {
+                    isDeleted ?
+                    <Text
+                        numberOfLines = {1}
                         style = {{
-                            borderWidth: 1,
-                            borderColor: mode == '' ? '#c8d6e5' : 'lightgrey',
-                            justifyContent: 'space-between',
-                            borderRadius: 40,
-                            paddingHorizontal: 20,
                             fontFamily: OpenSans.Regular,
-                            color: mode == '' ? 'black' : 'white'
+                            color: mode == '' ? 'black' : 'white',
+                            textAlign: 'center',
+                            alignSelf: 'center',
+                            flex:1,
+                            paddingVertical: 10
                         }}
-                        value = {inputText}
-                    />
-                </View>
-                <TouchableOpacity
-                    activeOpacity = {0.7}
-                    onPress = {() => submit()}
-                    style = {{
-                        padding: 10,
-                        backgroundColor: mode == '' ? '#0abde3' : '#3a3a3a',
-                        justifyContent: 'center',
-                        borderRadius: 25,
-                    }}
-                >
-                    <Image
-                        source = {require('../images/send.png')}
+                    >
+                        Anda telah {Dikeluarkan ? 'dikeluarkan' : 'keluar'}
+                    </Text>
+                    :
+                    <>
+                    <View
                         style = {{
-                            width: 25,
-                            height: 25,
-                            tintColor: 'white'
+                            flex:1,
+                            justifyContent: 'space-between',
+                            paddingRight: 10
                         }}
-                    />
-                </TouchableOpacity>
+                    >
+                        <TextInput
+                            multiline = {true}
+                            placeholder = 'Type a message'
+                            placeholderTextColor = 'grey'
+                            onSubmitEditing = {() => submit()}
+                            onChangeText = {(newValue: string) => setInputText(newValue)}
+                            style = {{
+                                borderWidth: 1,
+                                borderColor: mode == '' ? '#c8d6e5' : 'lightgrey',
+                                justifyContent: 'space-between',
+                                borderRadius: 40,
+                                paddingHorizontal: 20,
+                                fontFamily: OpenSans.Regular,
+                                color: mode == '' ? 'black' : 'white'
+                            }}
+                            value = {inputText}
+                        />
+                    </View>
+                    <TouchableOpacity
+                        activeOpacity = {0.7}
+                        onPress = {() => submit()}
+                        style = {{
+                            padding: 10,
+                            backgroundColor: mode == '' ? '#0abde3' : '#3a3a3a',
+                            justifyContent: 'center',
+                            borderRadius: 25,
+                        }}
+                    >
+                        <Image
+                            source = {require('../images/send.png')}
+                            style = {{
+                                width: 25,
+                                height: 25,
+                                tintColor: 'white'
+                            }}
+                        />
+                    </TouchableOpacity>
+                    </>
+                }
             </View>
         </SafeAreaView>
         </>

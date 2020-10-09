@@ -15,4 +15,8 @@ export type StackParamsList = {
         withGroup?: any
     },
     NewGroup: undefined,
+    DetailGroup: {
+        roomIndex: any,
+        isDeleted?: boolean
+    }
 }
