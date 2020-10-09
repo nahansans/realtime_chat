@@ -202,6 +202,7 @@ const Home = (props: PropsList) => {
 
     const scale = useRef(new Animated.Value(0)).current
     const scaleSearch = useRef(new Animated.Value(0)).current
+    const scaleNewGroup = useRef(new Animated.Value(0)).current
     const scaleGradient = useRef(new Animated.Value(0)).current
     const modalOpacity = useRef(new Animated.Value(0)).current
     const circleView = useRef(new Animated.Value(0)).current
@@ -223,6 +224,12 @@ const Home = (props: PropsList) => {
                 useNativeDriver: true,
             }),
             Animated.timing(scaleSearch, {
+                toValue: 1,
+                duration: 300,
+                delay: 200,
+                useNativeDriver: true
+            }),
+            Animated.timing(scaleNewGroup, {
                 toValue: 1,
                 duration: 300,
                 delay: 200,
@@ -263,8 +270,8 @@ const Home = (props: PropsList) => {
             navigation.navigate('Chat', {
                 fromScreen: 'Home',
                 roomIndex: sessionNotificationData.roomIndex,
-                withUser: sessionNotificationData.withUser == undefined ? undefined : sessionNotificationData.withUser,                
-                withGroup: sessionNotificationData.withGroup != undefined ?  sessionNotificationData.withGroup : undefined
+                withUser: sessionNotificationData.withUser,
+                withGroup: sessionNotificationData.withGroup
             })
         }
     }
@@ -499,7 +506,8 @@ const Home = (props: PropsList) => {
                                         })}
                                         style = {{
                                             flexDirection: 'row',
-                                            padding: 10,
+                                            paddingVertical: 10,
+                                            paddingHorizontal: 20,
                                             alignItems: 'center',
                                             borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
                                             borderBottomWidth: 1,
@@ -561,7 +569,41 @@ const Home = (props: PropsList) => {
                         })
                     }
                 </ScrollView>
-                
+                <Animated.View
+                    style = {{
+                        position: 'absolute',
+                        bottom: 70, right: 20,
+                        backgroundColor: mode == '' ? '#48dbfb' : '#2D2D2D',
+                        borderRadius: 40,
+                        padding: 10,
+                        transform: [{scale: scaleNewGroup}]
+                    }}
+                >
+                    <Pressable
+                        onPress = {() => {
+                            navigation.navigate('NewGroup')
+                        }}
+                        onPressIn = {() => {
+                            Animated.timing(scaleNewGroup, {
+                                toValue: 0.8,
+                                duration: 100,
+                                useNativeDriver: true
+                            }).start()
+                        }}
+                        onPressOut = {() => {
+                            Animated.timing(scaleNewGroup, {
+                                toValue: 1,
+                                duration: 100,
+                                useNativeDriver: true
+                            }).start()
+                        }}
+                    >
+                        <Image
+                            source = {require('../images/users.png')}
+                            style = {{ width: 20, height: 20, tintColor: 'white' }}
+                        />
+                    </Pressable>
+                </Animated.View>
                 <Animated.View
                     style = {{
                         position: 'absolute',
@@ -599,7 +641,7 @@ const Home = (props: PropsList) => {
                         }}
                     >
                         <Image
-                            source = {require('../images/message.png')}
+                            source = {require('../images/search.png')}
                             style = {{ width: 20, height: 20, tintColor: 'white' }}
                         />
                     </Pressable>

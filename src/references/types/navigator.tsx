@@ -15,7 +15,4 @@ export type StackParamsList = {
         withGroup?: any
     },
     NewGroup: undefined,
-    EnterName: {
-        data: any
-    }
 }

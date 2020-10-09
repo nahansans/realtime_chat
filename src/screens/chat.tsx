@@ -212,7 +212,7 @@ const Chat = (props: PropsList) => {
                     },
                     to: value,
                     data: {
-                        roomIndex,
+                        roomIndex: route.params['roomIndex'] != undefined ? route.params['roomIndex'] : roomIndex,
                         withUser: route.params['withGroup'] != undefined ? undefined : sessionUser.username,
                         withGroup: route.params['withGroup'] != undefined ? route.params['withGroup'] : undefined
                     }
@@ -301,7 +301,7 @@ const Chat = (props: PropsList) => {
                                     fontSize: 12,
                                 }}
                             >
-                                {`${room.participants} `}
+                                {room.participants != undefined ? `${room.participants} ` : null}
                             </Text>
                         : null
                     }
@@ -398,6 +398,7 @@ const Chat = (props: PropsList) => {
                                             marginLeft:  message.sender != 'Sistem' ? 10 : 0,
                                             marginRight:  message.sender != 'Sistem' ? 50 : 0,
                                             marginTop: 10,
+                                            marginBottom: 10,
                                         }}
                                     >
                                         {

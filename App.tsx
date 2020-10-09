@@ -8,7 +8,6 @@ import Home from './src/screens/home';
 import Register from './src/screens/register';
 import Chat from './src/screens/chat';
 import NewGroup from './src/screens/new-group';
-import EnterName from './src/screens/new-group/enter-name'
 
 import messaging from '@react-native-firebase/messaging'
 import PushNotification from 'react-native-push-notification'
@@ -91,10 +90,6 @@ const App = () => {
           <Stack.Screen
             name = 'NewGroup'
             component = {NewGroup}
-          />
-          <Stack.Screen
-            name = 'EnterName'
-            component = {EnterName}
           />
         </Stack.Navigator>
       </NavigationContainer>

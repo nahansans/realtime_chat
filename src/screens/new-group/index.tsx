@@ -9,6 +9,7 @@ import database from '@react-native-firebase/database';
 import LinearGradient from 'react-native-linear-gradient';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { TextInput } from 'react-native-gesture-handler';
+import { RoomType } from '../../references/types/room';
 
 type PropsList = {
     navigation: StackNavigationProp<StackParamsList, 'NewGroup'>
@@ -30,6 +31,8 @@ const NewGroup = (props: PropsList) => {
     const scrollViewHorizontalRef = useRef<ScrollView>(null)
     const [users, setUsers] = useState([] as usersType[])
     const scaleNext = useRef(new Animated.Value(1)).current
+    const [textValue, setTextValue] = useState('')
+    const [createRoom, setcreateRoom] = useState<RoomType[]>([])
 
     useEffect(() => {
         checkTheme()
@@ -45,9 +48,14 @@ const NewGroup = (props: PropsList) => {
     }, [])
 
     async function getSessionUserAndRooms() {
-        const recentSessionUser = JSON.parse(await AsyncStorage.getItem('SessionUser') as string) as SessionUserType        
+        const sessionUser = await AsyncStorage.getItem('SessionUser')
+        setSessionUser(JSON.parse(sessionUser!) as SessionUserType)
 
-        setSessionUser(recentSessionUser)
+        database()
+        .ref('rooms')
+        .on('value', (snapshot: any) => {
+            setcreateRoom(snapshot.val() as RoomType[])
+        })
     }
     const checkTheme = async() => {
         const themeMode = await AsyncStorage.getItem('mode')
@@ -85,6 +93,51 @@ const NewGroup = (props: PropsList) => {
                 break
             }
             
+        }
+    }
+    const submit = () => {
+        if (textValue != '') {
+            const newRoomData = createRoom == null ? [] as RoomType[] : JSON.parse(JSON.stringify(createRoom)) as RoomType[]
+            const newParticipant = JSON.parse(JSON.stringify(participant))
+            newParticipant.unshift(sessionUser)
+
+            let participants = {} as any
+            for(let roomDataIndex = 0; roomDataIndex < newParticipant.length; roomDataIndex++) {
+                const element = newParticipant[roomDataIndex] as usersType
+                participants[roomDataIndex] = element.username
+            }
+            
+            console.log(participants)
+
+            newRoomData.push({
+                participants: participants,
+                groupName: textValue,
+                messages: [{
+                    sender: "Sistem",
+                    time: (new Date()).getTime(),
+                    text: `${sessionUser.username} telah membuat grub`
+                }],
+                created_by: sessionUser.username
+            })
+            let roomDataToSend = {} as any
+            let roomIndex = 0
+            for(let roomDataIndex = 0; roomDataIndex < newRoomData.length; roomDataIndex++) {
+                roomDataToSend[roomDataIndex.toString()] = newRoomData[roomDataIndex]
+                roomIndex = roomDataIndex
+            }
+            
+            database()
+                .ref(`/rooms/`)
+                .update(roomDataToSend)
+                .then(async() => {                
+                    navigation.replace('Chat', {
+                        fromScreen: 'Home',
+                        roomIndex,
+                        withUser: undefined,
+                        withGroup: textValue,
+                    })
+                    setTextValue('')
+                })
         }
     }
     return (
@@ -162,6 +215,28 @@ const NewGroup = (props: PropsList) => {
                     paddingHorizontal: 20,
                     borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
                     borderBottomWidth: 1,                    
+                }}
+            >
+                <TextInput
+                    placeholder = 'Enter group name'
+                    placeholderTextColor = {mode == '' ? '#242424' : 'white'}
+                    style = {{
+                        fontFamily: OpenSans.Regular,
+                        color: mode == '' ? 'black' : 'white'
+                    }}
+                    onChangeText = {(value) => {
+                        setTextValue(value)
+                    }}
+                />
+            </View>
+            <View
+                style = {{
+                    paddingHorizontal: 20,
+                    borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
+                    borderBottomWidth: 1,
+                    // borderTopWidth: 1,
+                    // borderTopColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
+                    marginTop: 50,
                 }}
             >
                 <TextInput
@@ -263,7 +338,6 @@ const NewGroup = (props: PropsList) => {
                                     activeOpacity = {0.6}
                                     // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
                                     onPress = {() => {
-                                        console.log(participant.length) 
                                         if (participant.length == 0) {                                            
                                             const newParticipant = participant.concat(item)
     
@@ -273,8 +347,8 @@ const NewGroup = (props: PropsList) => {
                                                 const element = participant[index]
                                                 
                                                 if (element.username != item.username) {
+                                                    console.log(element.username)
                                                     const newParticipant = participant.concat(item)
-    
                                                     setParticipant(newParticipant)                                                
                                                     break
                                                 }
@@ -287,7 +361,8 @@ const NewGroup = (props: PropsList) => {
                                         padding: 10,
                                         alignItems: 'center',
                                         borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
-                                        borderBottomWidth: 1
+                                        borderBottomWidth: 1,
+                                        marginTop: 10
                                     }}
                                 >
                                     
@@ -329,7 +404,7 @@ const NewGroup = (props: PropsList) => {
             >
                 <Pressable
                     onPress = {() => {
-                        navigation.navigate('EnterName', {data: participant})
+                        submit()
                     }}
                     onPressIn = {() => {
                         Animated.timing(scaleNext, {
@@ -347,7 +422,7 @@ const NewGroup = (props: PropsList) => {
                     }}
                 >
                     <Image
-                        source = {require('../../images/right-arrow.png')}
+                        source = {require('../../images/ic_add_white.png')}
                         style = {{ width: 20, height: 20, tintColor: 'white' }}
                     />
                 </Pressable>
