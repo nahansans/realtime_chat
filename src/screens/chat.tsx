@@ -12,7 +12,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import database from '@react-native-firebase/database';
 
 import { SessionUserType } from '../references/types/session-user'
-import { RoomType } from '../references/types/room'
+import { deletedType, RoomType } from '../references/types/room'
 import AsyncStorage from '@react-native-community/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import moment from 'moment';
@@ -38,9 +38,10 @@ const Chat = (props: PropsList) => {
     const scrollViewRef = useRef<ScrollView>(null)
     const [getUsersData, setgetUsersData] = useState([] as SessionUserType[])
     const [mode, setMode] = useState('')
-    const [participants, setParticipants] = useState([] as string[])
+    const [participants, setParticipants] = useState()
     const [isDeleted, setIsDeleted] = useState(false)
     const [Dikeluarkan, setDikeluarkan] = useState(false)
+    const [totalParticipants, setTotalParticipants] = useState(0)
 
     useEffect(() => {      
         checkTheme()
@@ -99,13 +100,11 @@ const Chat = (props: PropsList) => {
                                     if (element.status == 'dikeluarkan') {
                                         setDikeluarkan(true)
                                     }
-                                }
-                                filteredParticipants = newParticipants.filter((participant: any) => participant != element.username)
+                                }                                
                             }
-                        } else {
-                            filteredParticipants = newParticipants
                         }
-                        setParticipants(filteredParticipants)
+                        let isTotalParticipants = snapshot.val().deleted_participants != undefined ? snapshot.val().participants.length - snapshot.val().deleted_participants.length : snapshot.val().deleted_participants.length
+                        setTotalParticipants(isTotalParticipants)
                     }
                 })
         } else {
@@ -325,7 +324,7 @@ const Chat = (props: PropsList) => {
                                     fontSize: 12,
                                 }}
                             >
-                                {participants.length} Members
+                                {totalParticipants > 0 ? totalParticipants : 0} Members
                             </Text>
                         : null
                     }

@@ -44,6 +44,7 @@ const DetailGroup = (props: PropsList) => {
     const [users, setUsers] = useState([] as usersType[])
     const modalOpacity = useRef(new Animated.Value(0)).current
     const textInputRef = useRef<TextInput>(null)
+    const [deletedParticipants, setDeletedParticipants] = useState([] as deletedType[])
 
     useEffect(() => {      
         checkTheme()
@@ -80,14 +81,8 @@ const DetailGroup = (props: PropsList) => {
                 setRoom(snapshot.val() as RoomType)
                 let newParticipants = snapshot.val().participants
                 let filteredParticipants = [] as string[]
-                if (snapshot.val().deleted_participants != undefined) {
-                    for (let index = 0; index < snapshot.val().deleted_participants.length; index++) {
-                        const element = snapshot.val().deleted_participants[index];
-                        filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username && participant != element.username)
-                    }
-                } else {
-                    filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username)
-                }
+                setDeletedParticipants(snapshot.val().deleted_participants)
+                filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username)
                 setparticipants(filteredParticipants)
         })
 
@@ -344,42 +339,50 @@ const DetailGroup = (props: PropsList) => {
                 }
                 {
                     participants != undefined ?
-                    participants.map((item, index) => {
+                    participants.map((item, index) => {                        
+                        const isThisDeletedParticipant = deletedParticipants != undefined ? deletedParticipants.filter(user => user.username == item ).length == 1 : 0
+                        
                         return (
-                            <View
-                                style = {{
-                                    opacity: item == null ? 0 : 1,
-                                    flexDirection: 'row',
-                                    marginVertical: item == null ? 0 : 10
-                                }}
-                            >
-                                <Text
+                            <>
+                            {
+                                !isThisDeletedParticipant ?
+                                <View
                                     style = {{
-                                        color: mode == '' ? '#222f3e' : 'white',
-                                        fontSize: item == null ? 0 : 14,
-                                        flex: 1,
-                                        justifyContent: 'space-between'
+                                        opacity: 1,
+                                        flexDirection: 'row',
+                                        marginVertical: 10
                                     }}
                                 >
-                                    {item == sessionUser.username ? 'Anda' : item}
-                                </Text>
-                                {
-                                    !route.params.isDeleted ?
-                                    <TouchableOpacity
-                                        onPress = {() => deleteMember(item)}
+                                    <Text
+                                        style = {{
+                                            color: mode == '' ? '#222f3e' : 'white',
+                                            fontSize: 14,
+                                            flex: 1,
+                                            justifyContent: 'space-between'
+                                        }}
                                     >
-                                        <Image
-                                            source = {require('../images/trash.png')}
-                                            style = {{
-                                                width: 18,
-                                                height: 18,
-                                                tintColor: mode == '' ? '#1D1D1D' : '#f9f9f9',
-                                            }}
-                                        />
-                                    </TouchableOpacity>
-                                    : null
-                                }
-                            </View>
+                                        {item == sessionUser.username ? 'Anda' : item}
+                                    </Text>
+                                    {
+                                        !route.params.isDeleted ?
+                                        <TouchableOpacity
+                                            onPress = {() => deleteMember(item)}
+                                        >
+                                            <Image
+                                                source = {require('../images/trash.png')}
+                                                style = {{
+                                                    width: 18,
+                                                    height: 18,
+                                                    tintColor: mode == '' ? '#1D1D1D' : '#f9f9f9',
+                                                }}
+                                            />
+                                        </TouchableOpacity>
+                                        : null
+                                    }
+                                </View>
+                                : null
+                            }
+                            </>
                         )
                     })
                     : null

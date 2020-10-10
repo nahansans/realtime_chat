@@ -326,6 +326,18 @@ const NewGroup = (props: PropsList) => {
                                             const newParticipant = participant.concat(item)
     
                                             setParticipant(newParticipant)  
+                                        } else {
+                                            for (let index = 0; index < participant.length; index++) {
+                                                const element = participant[index];
+                                                if (element.username == item.username) {
+                                                    const newParticipant = JSON.parse(JSON.stringify(participant))
+                                                    newParticipant.splice(index, 1)
+                                                    setParticipant(newParticipant)
+                                                    scrollViewHorizontalRef.current?.scrollTo({x: 0})
+                                                    break
+                                                }
+                                                
+                                            }
                                         }
                                     }}
                                     style = {{
