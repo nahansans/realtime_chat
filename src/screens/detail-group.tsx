@@ -171,6 +171,7 @@ const DetailGroup = (props: PropsList) => {
     }
 
     const deletedGroup = () => {
+        
         database()
         .ref(`/rooms/${route.params['roomIndex']}`)
         .update({
@@ -183,7 +184,7 @@ const DetailGroup = (props: PropsList) => {
         })
         .then(() => {
             console.log('delete success')
-            navigation.replace('Home')
+            navigation.navigate('Home')
         })
     }
 
@@ -328,15 +329,19 @@ const DetailGroup = (props: PropsList) => {
                 >
                     Members
                 </Text>
-                <Text
-                    style = {{
-                        color: mode == '' ? '#222f3e' : 'white',
-                        fontSize: 14,
-                        marginVertical: 10
-                    }}
-                >
-                    Anda
-                </Text>
+                {
+                    !route.params.isDeleted ?
+                    <Text
+                        style = {{
+                            color: mode == '' ? '#222f3e' : 'white',
+                            fontSize: 14,
+                            marginVertical: 10
+                        }}
+                    >
+                        Anda
+                    </Text>
+                    : null
+                }
                 {
                     participants != undefined ?
                     participants.map((item, index) => {
