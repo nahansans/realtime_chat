@@ -200,23 +200,32 @@ const DetailGroup = (props: PropsList) => {
 
     async function addMember() {
         const newRoomData = JSON.parse(JSON.stringify(room)) as RoomType
-
+        let newDeletedParticipants = {} as deletedType[]
+        
         for (let index = 0; index < selectedParticipants.length; index++) {
             const element = selectedParticipants[index];
+            if (deletedParticipants.length > 0) {
+                for (let i = 0; i < deletedParticipants.length; i++) {
+                    const elementDeleted = deletedParticipants[i];
+                    if (element.username == elementDeleted.username) {
+                        newRoomData.deleted_participants?.splice(i, 1)
+                        console.log(i)
+                    }
+                }
+            }
+            else {
+                newRoomData.participants.push(element.username)
+            }
             newRoomData.messages?.push({
                 sender: 'Sistem',
                 time: (new Date()).getTime(),
                 text: `${sessionUser.username} telah menambahkan ${element.username}`
             })
-            newRoomData.participants.push(element.username)
         }
         
         database()
         .ref(`/rooms/${route.params.roomIndex}`)
-        .update({
-            messages: newRoomData.messages,
-            participants: newRoomData.participants            
-        })
+        .update(newRoomData)
         .then(() => {
             console.log('berhasil menambah member')
             StatusBar.setHidden(false)
