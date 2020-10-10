@@ -76,25 +76,6 @@ const NewGroup = (props: PropsList) => {
         })
     }
 
-    const selectedParticipant = (value:string ) => {
-        for (let index = 0; index < participant.length; index++) {
-            const element = participant[index];
-            if (element.username == value) {
-                return (
-                    <Image
-                        source = {require('../../images/ic_checkbox_blue_filled.png')}
-                        style = {{
-                            width: 15,
-                            height: 15,
-                            marginLeft: 10,
-                        }}
-                    />
-                )
-                break
-            }
-            
-        }
-    }
     const submit = () => {
         if (textValue != '' && participant.length > 0) {
             const newRoomData = createRoom == null ? [] as RoomType[] : JSON.parse(JSON.stringify(createRoom)) as RoomType[]
@@ -333,28 +314,18 @@ const NewGroup = (props: PropsList) => {
                 >
                     {
                         users.map((item, index) => {
+                            const isThisUserAParticipant = participant.filter(user => user.username == item.username).length == 1
+
                             return (
                                 <TouchableOpacity
                                     key = {index}
                                     activeOpacity = {0.6}
                                     // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
                                     onPress = {() => {
-                                        if (participant.length == 0) {                                            
+                                        if(!isThisUserAParticipant) {
                                             const newParticipant = participant.concat(item)
     
                                             setParticipant(newParticipant)  
-                                        } else {
-                                            for (let index = 0; index < participant.length; index++) {
-                                                const element = participant[index]
-                                                
-                                                if (element.username != item.username) {
-                                                    console.log(element.username)
-                                                    const newParticipant = participant.concat(item)
-                                                    setParticipant(newParticipant)                                                
-                                                    break
-                                                }
-                                                
-                                            }
                                         }
                                     }}
                                     style = {{
@@ -366,7 +337,6 @@ const NewGroup = (props: PropsList) => {
                                         marginTop: 10
                                     }}
                                 >
-                                    
                                     <View
                                         style = {{
                                             paddingLeft: 10,
@@ -385,7 +355,19 @@ const NewGroup = (props: PropsList) => {
                                             {item.username}
                                         </Text>
 
-                                        {selectedParticipant(item.username)}
+                                        {
+                                            isThisUserAParticipant ?
+                                                <Image
+                                                    source = {require('../../images/ic_checkbox_blue_filled.png')}
+                                                    style = {{
+                                                        width: 15,
+                                                        height: 15,
+                                                        marginLeft: 10,
+                                                    }}
+                                                />
+                                                :
+                                                null
+                                        }
                                     </View>
                                 </TouchableOpacity>
                             )
