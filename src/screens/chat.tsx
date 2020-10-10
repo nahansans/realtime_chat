@@ -100,10 +100,10 @@ const Chat = (props: PropsList) => {
                                         setDikeluarkan(true)
                                     }
                                 }
-                                filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username && participant != element.username)
+                                filteredParticipants = newParticipants.filter((participant: any) => participant != element.username)
                             }
                         } else {
-                            filteredParticipants = newParticipants.filter((participant: any) => participant != sessionUser.username)
+                            filteredParticipants = newParticipants
                         }
                         setParticipants(filteredParticipants)
                     }
@@ -516,7 +516,8 @@ const Chat = (props: PropsList) => {
                                 borderRadius: 40,
                                 paddingHorizontal: 20,
                                 fontFamily: OpenSans.Regular,
-                                color: mode == '' ? 'black' : 'white'
+                                color: mode == '' ? 'black' : 'white',
+                                maxHeight: 80,
                             }}
                             value = {inputText}
                         />
