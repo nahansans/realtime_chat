@@ -45,6 +45,9 @@ const DetailGroup = (props: PropsList) => {
     const modalOpacity = useRef(new Animated.Value(0)).current
     const textInputRef = useRef<TextInput>(null)
     const [deletedParticipants, setDeletedParticipants] = useState([] as deletedType[])
+    const [selectedParticipants, setSelectedParticipants] = useState<usersType[]>([])
+
+    const scrollViewHorizontalRef = useRef<ScrollView>(null)
 
     useEffect(() => {      
         checkTheme()
@@ -184,16 +187,49 @@ const DetailGroup = (props: PropsList) => {
     }
 
     const search = (value: string) => {        
-        // database()
-        // .ref('/users')
-        // .on('value', (snapshot:any) => {
-        //     let users = (snapshot.val() || []) as usersType[]            
-        //     let filteredUsers = [] as usersType[]
+        database()
+        .ref('/users')
+        .on('value', (snapshot:any) => {
+            let users = (snapshot.val() || []) as usersType[]            
+            let filteredUsers = [] as usersType[]
+            console.log(value)
+            filteredUsers = users.filter(user => user.username.toLocaleLowerCase().includes(value.toLowerCase()) && user.username != sessionUser.username)
+            setUsers(filteredUsers)
+        })
+    }
 
-            
-        //     filteredUsers = users.filter(user => user.username.toLocaleLowerCase().includes(value.toLowerCase()) && user.username != sessionUser.username)
-        //     setUsers(filteredUsers)
-        // })
+    async function addMember() {
+        const newRoomData = JSON.parse(JSON.stringify(room)) as RoomType
+
+        for (let index = 0; index < selectedParticipants.length; index++) {
+            const element = selectedParticipants[index];
+            newRoomData.messages?.push({
+                sender: 'Sistem',
+                time: (new Date()).getTime(),
+                text: `${sessionUser.username} telah menambahkan ${element.username}`
+            })
+            newRoomData.participants.push(element.username)
+        }
+        
+        database()
+        .ref(`/rooms/${route.params.roomIndex}`)
+        .update({
+            messages: newRoomData.messages,
+            participants: newRoomData.participants            
+        })
+        .then(() => {
+            console.log('berhasil menambah member')
+            StatusBar.setHidden(false)
+            Animated.timing(modalOpacity, {
+                toValue: 0,
+                duration: 100,
+                useNativeDriver: true
+            }).start(()=> {
+                setModalSearching(false)
+                setUsers([])
+                setSelectedParticipants([])
+            })
+        })
     }
 
     return(
@@ -398,6 +434,7 @@ const DetailGroup = (props: PropsList) => {
                     }).start(()=> {
                         setModalSearching(false)
                         setUsers([])
+                        setSelectedParticipants([])
                     })
                 }}
                 visible = {modalSearching}
@@ -426,6 +463,7 @@ const DetailGroup = (props: PropsList) => {
                                 }).start(()=> {
                                     setModalSearching(false)
                                     setUsers([])
+                                    setSelectedParticipants([])
                                 })
                             }}
                             style = {{
@@ -479,19 +517,130 @@ const DetailGroup = (props: PropsList) => {
                                 }}
                             />
                         </View>
+                        {
+                            selectedParticipants.length > 0 ?
+                            <View style = {{ borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D', borderBottomWidth: 1, paddingVertical: 10, flexDirection: 'row', alignItems: 'center' }} >
+                                <ScrollView   
+                                        ref = {scrollViewHorizontalRef}
+                                        horizontal
+                                        showsHorizontalScrollIndicator = {false}
+                                        onContentSizeChange = {() => {
+                                            scrollViewHorizontalRef.current?.scrollToEnd()
+                                        }}
+                                    >
+                                        {
+                                            selectedParticipants.map((item: any, index: any) => {
+                                                return (
+                                                    <>
+                                                    <TouchableOpacity
+                                                        key = {index}
+                                                        activeOpacity = {0.6}
+                                                        // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
+                                                        onPress = {() => {
+                                                            for (let index = 0; index < selectedParticipants.length; index++) {
+                                                                const element = selectedParticipants[index];
+                                                                if (element.username == item.username) {
+                                                                    const newParticipant = JSON.parse(JSON.stringify(selectedParticipants))
+                                                                    newParticipant.splice(index, 1)
+                                                                    setSelectedParticipants(newParticipant)
+                                                                    scrollViewHorizontalRef.current?.scrollTo({x: 0})
+                                                                    break
+                                                                }
+                                                                
+                                                            }
+                                                        }}
+                                                        style = {{
+                                                            flexDirection: 'row',
+                                                            margin: 10,
+                                                            alignItems: 'center',
+                                                        }}
+                                                    >
+                                                        
+                                                        <View
+                                                            style = {{
+                                                                paddingHorizontal: 10,
+                                                                paddingVertical: 5,
+                                                                flexDirection: 'row',
+                                                                alignItems: 'center',
+                                                                backgroundColor: mode == '' ? '#c8d6e5' : '#353535',
+                                                                borderRadius: 20
+                                                            }}
+                                                        >
+                                                            <Text
+                                                                numberOfLines = {1}
+                                                                style = {{
+                                                                    fontFamily: OpenSans.SemiBold,
+                                                                    fontSize: 14,
+                                                                    color: mode == '' ? '#222f3e' : 'white'
+                                                                }}
+                                                            >
+                                                                {item.username}
+                                                            </Text>
+                                                            <Image
+                                                                source = {require('../images/close-cross-in-circular-outlined-interface-button.png')}
+                                                                style = {{
+                                                                    width: 12,
+                                                                    height: 12,
+                                                                    tintColor: mode == '' ? '#222f3e' : 'white'
+                                                                }}
+                                                            />
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                    </>
+                                                )
+                                            })
+                                        }
+                                    </ScrollView>
+                                    <TouchableOpacity
+                                        style = {{
+                                            backgroundColor: mode == '' ? '#48dbfb' : '#2D2D2D',
+                                            borderRadius: 40,
+                                            marginVertical: 10,
+                                            padding: 10
+                                        }}
+                                        onPress = {addMember}
+                                    >
+                                        <Image
+                                            source = {require('../images/ic_add_white.png')}
+                                            style = {{ width: 20, height: 20, tintColor: 'white' }}
+                                        />
+                                    </TouchableOpacity>
+                            </View>
+                            : null
+                        }
                         <View style = {{flex: 1}} >
                             <ScrollView        
                                 keyboardShouldPersistTaps = 'handled'
                             >
                                 {
                                     users.map((item, index) => {
+                                        const isThisDeletedParticipant = deletedParticipants != undefined ? deletedParticipants.filter(user => user.username == item.username ).length == 1 : 0
+                                        const isThisUserAParticipant = selectedParticipants.filter(user => user.username == item.username).length == 1
                                         return (
+                                            <>
                                             <TouchableOpacity
                                                 key = {index}
                                                 activeOpacity = {0.6}
                                                 // onPress = {() => navigation.navigate('Chat', {fromScreen:'Home', roomIndex, withUser: interlocutors})}
                                                 onPress = {() => {
-                                                
+                                                    
+                                                    if(!isThisUserAParticipant) {
+                                                        const newParticipant = selectedParticipants.concat(item)
+                
+                                                        setSelectedParticipants(newParticipant)  
+                                                    } else {
+                                                        for (let index = 0; index < selectedParticipants.length; index++) {
+                                                            const element = selectedParticipants[index];
+                                                            if (element.username == item.username) {
+                                                                const newParticipant = JSON.parse(JSON.stringify(selectedParticipants))
+                                                                newParticipant.splice(index, 1)
+                                                                setSelectedParticipants(newParticipant)
+                                                                scrollViewHorizontalRef.current?.scrollTo({x: 0})
+                                                                break
+                                                            }
+                                                            
+                                                        }
+                                                    }
                                                 }}
                                                 style = {{
                                                     flexDirection: 'row',
@@ -505,6 +654,8 @@ const DetailGroup = (props: PropsList) => {
                                                 <View
                                                     style = {{
                                                         paddingLeft: 10,
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center'
                                                     }}
                                                 >
                                                     <Text
@@ -517,8 +668,23 @@ const DetailGroup = (props: PropsList) => {
                                                     >
                                                         {item.username}
                                                     </Text>
+                                                    {
+                                                        isThisUserAParticipant ?
+                                                            <Image
+                                                                source = {require('../images/ic_checkbox_blue_filled.png')}
+                                                                style = {{
+                                                                    width: 15,
+                                                                    height: 15,
+                                                                    marginLeft: 10,
+                                                                }}
+                                                            />
+                                                            :
+                                                            null
+                                                    }
                                                 </View>
                                             </TouchableOpacity>
+                                        
+                                            </>
                                         )
                                     })
                                 }

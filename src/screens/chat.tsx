@@ -103,7 +103,7 @@ const Chat = (props: PropsList) => {
                                 }                                
                             }
                         }
-                        let isTotalParticipants = snapshot.val().deleted_participants != undefined ? snapshot.val().participants.length - snapshot.val().deleted_participants.length : snapshot.val().deleted_participants.length
+                        let isTotalParticipants = snapshot.val().deleted_participants != undefined ? snapshot.val().participants.length - snapshot.val().deleted_participants.length : snapshot.val().participants.length
                         setTotalParticipants(isTotalParticipants)
                     }
                 })
