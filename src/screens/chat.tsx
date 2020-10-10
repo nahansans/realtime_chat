@@ -88,7 +88,25 @@ const Chat = (props: PropsList) => {
             database()
                 .ref(`/rooms/${route.params.roomIndex}`)
                 .on('value', (snapshot: any) => {
+                    let newMessagesData = JSON.parse(JSON.stringify(snapshot.val().messages))
+                    
                     setRoom(snapshot.val() as RoomType)
+                    if (route.params.withUser != undefined) {
+                        
+                        for (let index = 0; index < snapshot.val().messages.length; index++) {
+                            const element = snapshot.val().messages[index];                            
+                            if (element.sender == route.params['withUser']) {
+                                if (element.isRead != "true") {
+                                    database()
+                                        .ref(`/rooms/${route.params.roomIndex}/messages/${index}`)
+                                        .update({
+                                            isRead: 'true'
+                                        })
+                                        .then(() => console.log('read update'))
+                                }
+                            }
+                        }
+                    }
                     if (route.params.withGroup != null) {
                         let newParticipants = snapshot.val().participants
                         let filteredParticipants = [] as string[]
@@ -147,7 +165,8 @@ const Chat = (props: PropsList) => {
                         messages: [{
                             sender: sessionUser.username,
                             time: (new Date()).getTime(),
-                            text: inputText
+                            text: inputText,
+                            isRead: ''
                         }]
                     })
                     let roomDataToSend = {} as any
@@ -180,7 +199,8 @@ const Chat = (props: PropsList) => {
         newRoomData.messages?.push({
             sender: sessionUser.username,
             time: (new Date()).getTime(),
-            text: inputText
+            text: inputText,
+            isRead: ''
         })
         database()
         .ref(`/rooms/${index}`)
@@ -398,15 +418,26 @@ const Chat = (props: PropsList) => {
                                         >
                                             {message.text}
                                         </Text>
-                                        <Text
-                                            style = {{
-                                                color: mode == '' ? 'dimgrey' : 'lightgrey',
-                                                alignSelf: 'flex-end',
-                                                fontSize: 12
-                                            }}
-                                        >
-                                            {moment(message.time).format('HH:mm')}
-                                        </Text>
+                                        <View style = {{ flexDirection: 'row', alignItems: 'center' }} >
+                                            <Text
+                                                style = {{
+                                                    color: mode == '' ? 'dimgrey' : 'lightgrey',
+                                                    alignSelf: 'flex-end',
+                                                    fontSize: 12,
+                                                    marginRight: route.params.withUser != undefined ? 5 : 0
+                                                }}
+                                            >
+                                                {moment(message.time).format('HH:mm')}
+                                            </Text>
+                                            {
+                                                route.params['withUser'] != undefined ?
+                                                <Image
+                                                    source = {message.isRead != '' ? require('../images/double-tick-indicator.png') : require('../images/check-symbol.png')}
+                                                    style = {{ width: 16, height:16, tintColor: mode == '' ? 'dimgrey' : 'lightgrey', }}
+                                                />
+                                                : null
+                                            }
+                                        </View>
                                     </View>
                                     :
                                     <View

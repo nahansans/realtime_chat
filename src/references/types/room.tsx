@@ -1,7 +1,8 @@
 type MessageType = {
     sender: string,
     text?: string,
-    time: number
+    time: number,
+    isRead?: string
 }
 export type deletedType = {
     last_message_index:any,
