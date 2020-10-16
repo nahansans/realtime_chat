@@ -1,6 +1,6 @@
 # realtime_chat
 # installation
-- git clone github.com/nahansans/realtime_chat.git
+- git clone https://github.com/nahansans/realtime_chat.git
 - cd realtime_chat
 - npm install
 
