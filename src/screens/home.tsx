@@ -57,13 +57,12 @@ type PropsMenu = {
     usernameColor: string,
     modeIcon: any,
     linearGradientColors: any,
-    linearGradientOpacity: any,
 }
 
 class Menu extends React.Component<PropsMenu, {}> {
     
     render() {
-        const { logoutModal, color, backgroundColor, backgroundColorUsername, username, usernameColor, changeTheme, modeIcon, linearGradientColors, linearGradientOpacity, newGroupNavigation } = this.props
+        const { logoutModal, color, backgroundColor, backgroundColorUsername, username, usernameColor, changeTheme, modeIcon, linearGradientColors, newGroupNavigation } = this.props
         return (
             <View
                 style = {{
@@ -82,12 +81,11 @@ class Menu extends React.Component<PropsMenu, {}> {
                 >
                     <LinearGradient
                         colors = {linearGradientColors}
-                        start = {{x: 0, y: 1.4}}
-                        end = {{x: 0.6, y: 0}}
+                        start = {{x: 0, y: 0.4}}
+                        end = {{x: 1, y: 0.6}}
                         style = {{
                             position: 'absolute',
                             top: 0, left: 0, right: 0, bottom: 0,
-                            opacity: linearGradientOpacity
                         }}
                     />
                     <Text
@@ -385,8 +383,7 @@ const Home = (props: PropsList) => {
                     backgroundColorUsername = {mode == '' ? '#0abde3' : '#262626'}
                     changeTheme = {() => changeTheme()}
                     modeIcon = {mode == '' ? require('../images/dark.png') : require('../images/light.png')}
-                    linearGradientColors = {mode == '' ? ['#10ac84', '#48dbfb'] : ['#262626', '#262626']}
-                    linearGradientOpacity = {mode == '' ? 0.8 : 1}
+                    linearGradientColors = {mode == '' ? ['#0057BF', '#00B2E9'] : ['#262626', '#262626']}
                 />
     return(        
         <>
@@ -428,8 +425,9 @@ const Home = (props: PropsList) => {
                         backgroundColor: mode == '' ? '#0abde3' : '#1D1D1D',
                         paddingHorizontal: 20,
                         overflow: 'hidden',   
-                        paddingBottom: 10,                    
-                        paddingTop: statusBarHeight + 10
+                        paddingBottom: 100,                    
+                        paddingTop: statusBarHeight + 10,
+                        marginBottom: -40
                     }}
                 >
                     <Animated.View
@@ -441,13 +439,12 @@ const Home = (props: PropsList) => {
                         }}
                     >
                         <LinearGradient
-                            colors = {mode == '' ? ['#48dbfb', '#10ac84'] : ['#262626', '#262626']}
+                            colors = {mode == '' ? ['#00B2E9', '#0057BF'] : ['#262626', '#262626']}
                             start = {{x: 0, y: 1}}
                             end = {{x: 1, y: 0}}
                             style = {{
                                 position: 'absolute',
                                 top: 0, left: 0, right: 0, bottom: 0,
-                                opacity: mode == '' ? 0.8 : 1
                             }}
                         />
                     </Animated.View>
@@ -465,7 +462,7 @@ const Home = (props: PropsList) => {
                                 style = {{
                                     width: 22,
                                     height: 22,
-                                    tintColor: 'white'
+                                    tintColor: 'rgba(255,255,255,0.5)'
                                 }}
                             />
                         </TouchableOpacity>
@@ -476,12 +473,12 @@ const Home = (props: PropsList) => {
                                 letterSpacing: 1,
                                 color: '#FFF',
                                 fontSize: 16,
-                                marginLeft: 10,
+                                flex: 1,
                                 justifyContent: 'space-between',
-                                flex: 1
+                                textAlign: 'center'
                             }}
                         >
-                            Skuy Chat
+                            SKUY CHAT
                         </Text>
                     </View>
 
@@ -497,7 +494,7 @@ const Home = (props: PropsList) => {
                                 return (
                                     <TouchableOpacity
                                         key = {roomIndex}
-                                        activeOpacity = {0.6}
+                                        activeOpacity = {0.9}
                                         onPress = {() => navigation.navigate('Chat', {
                                             fromScreen:'Home', 
                                             roomIndex, 
@@ -506,11 +503,20 @@ const Home = (props: PropsList) => {
                                         })}
                                         style = {{
                                             flexDirection: 'row',
-                                            paddingVertical: 10,
+                                            paddingVertical: 20,
                                             paddingHorizontal: 20,
                                             alignItems: 'center',
-                                            borderBottomColor: mode == '' ? '#c8d6e5' : '#2D2D2D',
-                                            borderBottomWidth: 1,
+                                            shadowColor: "#000",
+                                            shadowOffset: {
+                                                width: 7,
+                                                height: 7,
+                                            },
+                                            shadowOpacity: 0.1,
+                                            shadowRadius: 15,
+                                            elevation: 3,
+                                            marginHorizontal: 20,
+                                            marginBottom: 20,
+                                            backgroundColor: 'white'
                                         }}
                                     >
                                         {/* <Image
@@ -536,16 +542,30 @@ const Home = (props: PropsList) => {
                                             >
                                                 {room.groupName == undefined ? interlocutors : room.groupName}
                                             </Text>
-                                            <Text
-                                                numberOfLines = {1}
-                                                style = {{
-                                                    fontFamily: OpenSans.Regular,
-                                                    color: mode == '' ? '#222f3e' : 'lightgrey',
-                                                    fontSize: 12, 
-                                                }}
-                                            >
-                                                {room.messages![room.messages!.length - 1].sender != 'Sistem' ? room.messages![room.messages!.length - 1].sender + ' : ' + room.messages![room.messages!.length - 1].text : room.messages![room.messages!.length - 1].text}
-                                            </Text>
+                                            <View style = {{ flexDirection: 'row', alignItems: 'center' }} >
+                                                {
+                                                    room.messages![room.messages!.length - 1].sender == sessionUser.username ?
+                                                    <Image
+                                                        source = {room.messages![room.messages!.length - 1].isRead != 'true' ? require('../images/check-symbol.png') : require('../images/double-tick-indicator.png')}
+                                                        style = {{
+                                                            width: 10,
+                                                            height: 10
+                                                        }}
+                                                    />
+                                                    : null
+                                                }                                            
+                                                <Text
+                                                    numberOfLines = {1}
+                                                    style = {{
+                                                        fontFamily: OpenSans.Regular,
+                                                        color: mode == '' ? '#222f3e' : 'lightgrey',
+                                                        fontSize: 12,
+                                                        marginLeft: 5
+                                                    }}
+                                                >
+                                                    {room.messages![room.messages!.length - 1].text}
+                                                </Text>
+                                            </View>
                                         </View>
                                         <View>
                                             <Text
@@ -560,6 +580,19 @@ const Home = (props: PropsList) => {
                                             >
                                                 {moment(room.messages![room.messages!.length - 1].time).format('HH:mm')}
                                             </Text>
+                                            {
+                                                room.messages![room.messages!.length - 1].sender != sessionUser.username && room.messages![room.messages!.length - 1].isRead != 'true' ?
+                                                <View
+                                                    style = {{
+                                                        borderRadius: 20,
+                                                        backgroundColor: '#0057BF',
+                                                        height: 10,
+                                                        width: 10,
+                                                        alignSelf: 'flex-end',                                                        
+                                                    }}
+                                                />
+                                                : null
+                                            }
                                         </View>
                                     </TouchableOpacity>
                                 )   
